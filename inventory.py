@@ -13,7 +13,7 @@ from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parent
 FLAVORS = ("valedictorian", "all-nighter", "party-animal", "overachiever", "nutty-professor")
-BOX_SIZES = {6, 13, 24, 36, 48}
+BOX_SIZES = {6, 12, 24, 36, 48}
 DEFAULT_LIMIT = 100
 FIRST_PICKUP = date(2027, 1, 1)
 EASTERN = ZoneInfo("America/New_York")
@@ -90,8 +90,6 @@ def reserve(db, payload, now=None):
     if any(type(n) is not int or not 0 <= n <= 48 for n in quantities.values()):
         raise ValueError("Enter whole cookie quantities.")
     count = sum(quantities.values())
-    if count not in BOX_SIZES:
-        raise ValueError("Fill a box of 6, 13, 24, 36, or 48 cookies.")
     total = count * 350 + (500 if gift else 0)
     with db:
         db.execute("BEGIN IMMEDIATE")
@@ -103,6 +101,8 @@ def reserve(db, payload, now=None):
             ):
                 raise ValueError("This order reference is already in use.")
             return {"id": order_id, "totalCents": previous["total_cents"]}
+        if count not in BOX_SIZES:
+            raise ValueError("Fill a box of 6, 12, 24, 36, or 48 cookies.")
         require_open(pickup, now)
         stock = availability(db, pickup)
         if any(qty > stock[flavor] for flavor, qty in quantities.items()):
@@ -214,3 +214,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
