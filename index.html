@@ -41,16 +41,31 @@ input { accent-color:var(--ink); }
 .mission { background:var(--ink); color:white; }
 @media(max-width:42rem) { form { grid-template-columns:1fr; gap:.75rem; } }
 .site-logo { display:block; width:clamp(8rem, 19vw, 12rem); height:auto; }
-.hero { overflow:hidden; }
-.hero-inner { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); align-items:center; gap:2rem; }
-.hero { padding-block:clamp(2.5rem, 6vw, 5rem); background:linear-gradient(115deg,var(--sky) 70%,#d8f7ff 70%); }
-.hero h1 { max-width:10ch; font-size:clamp(3.4rem,7.4vw,7rem); }
-.hero h1 span { display:inline-block; }
-.hero h1 span:last-child { background:linear-gradient(transparent 72%,var(--gold) 72% 93%,transparent 93%); }
-.hero .tagline { margin:0 0 1rem; font-size:1rem; font-weight:850; letter-spacing:.07em; text-transform:uppercase; }
-.hero .button { box-shadow:.24rem .24rem 0 var(--ink); }
-.hero-art { margin:0; padding:.55rem; border:2px solid var(--ink); background:var(--paper); border-radius:1.25rem; box-shadow:.6rem .6rem 0 var(--gold); transform:rotate(2deg); }
-.hero-art img { display:block; width:100%; aspect-ratio:5/4; object-fit:cover; object-position:center 48%; border-radius:.75rem; }
+.hero { overflow:hidden; background:var(--ink); color:var(--paper); padding-block:clamp(2rem,5.5vw,5rem); }
+.hero-inner { display:grid; grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr); align-items:center; gap:clamp(1.5rem,5vw,4rem); }
+.hero h1 { font-family:system-ui,sans-serif; font-size:clamp(3.5rem,7.6vw,7rem); font-weight:950; line-height:.89; letter-spacing:-.088em; max-width:8ch; }
+.hero h1 span { display:block; color:var(--gold); }
+.hero .tagline { margin:0 0 1rem; font-size:.9rem; font-weight:850; letter-spacing:.08em; text-transform:uppercase; }
+.hero .button { border-color:var(--paper); border-radius:99rem; padding:.85rem 1.35rem; box-shadow:.22rem .22rem 0 var(--paper); }
+.hero .button:hover { background:var(--sky); }
+.hero-art { position:relative; margin:0 clamp(.2rem,1vw,.6rem) .9rem 0; border:clamp(.3rem,1vw,.65rem) solid var(--gold); background:var(--gold); border-radius:clamp(1.25rem,3vw,2.75rem); box-shadow:.65rem .75rem 0 #082e78; transform:rotate(2deg); }
+.hero-art img { display:block; width:100%; aspect-ratio:7/6; object-fit:cover; object-position:center 39%; border-radius:clamp(.9rem,2.5vw,2.05rem); }
+.drop-info { background:var(--gold); color:#102851; padding:.75rem 0; }
+.drop-info .wrap { display:flex; justify-content:center; flex-wrap:wrap; gap:.25rem 1rem; font-weight:800; text-align:center; }
+.drop-info span + span::before { content:"•"; margin-right:1rem; }
+.lineup { background:var(--sky); padding-block:clamp(2.5rem,6vw,5rem); }
+.lineup h2 { font:950 clamp(2.35rem,5.5vw,4.6rem)/.93 system-ui,sans-serif; letter-spacing:-.07em; }
+.cookie-cards { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:.7rem; margin:1.4rem 0 0; padding:0; list-style:none; }
+.cookie-card { background:#fff2ce; color:#172d50; min-width:0; border:1px solid #244e8c; border-radius:1rem; padding:.9rem .7rem 1rem; text-align:center; }
+.cookie-card:nth-child(2n) { background:#e6dcff; }
+.cookie-card:nth-child(3) { background:#ffd4c9; }
+.cookie-card:nth-child(4) { background:#ffcf83; }
+.cookie-card:nth-child(5) { background:#d6f2cc; }
+.cookie-card img { display:block; width:100%; aspect-ratio:1; object-fit:contain; mix-blend-mode:multiply; margin:auto; max-width:11rem; }
+.cookie-card h3 { font-size:clamp(.94rem,1.5vw,1.2rem); line-height:1.1; margin-top:.35rem; overflow-wrap:anywhere; }
+.cookie-card p { margin-top:.32rem; font-size:.93rem; line-height:1.3; }
+@media(max-width:50rem) { .cookie-cards { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+@media(max-width:32rem) { .cookie-cards { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 .pickup-field label { display:block; font-weight:800; margin-bottom:.5rem; }
 .pickup-field select { width:100%; max-width:28rem; padding:.72rem .6rem; color:inherit; background:white; border:1px solid var(--ink); border-radius:.4rem; font:inherit; }
 .pickup-field p { margin-top:.45rem; line-height:1.45; }
@@ -67,24 +82,40 @@ input { accent-color:var(--ink); }
   .hero-art { max-width:26rem; width:100%; margin-inline:auto; }
   .hero { padding-block:2rem; }
   .hero-inner { gap:1.8rem; }
+  .hero h1 { font-size:clamp(3.5rem,14vw,5.65rem); }
   .hero-art { transform:none; }
+  nav { gap:.65rem; }
+  .site-logo { width:clamp(6.2rem,27vw,8rem); }
 }
 </style>
 </head>
 <body>
-<header><nav class="wrap" aria-label="Main"><img class="site-logo" src="assets/campus-cookies.png" width="500" height="297" alt="Campus Cookies"><a href="#order">Build a box</a></nav></header>
+<header><nav class="wrap" aria-label="Main"><img class="site-logo" src="assets/campus-cookies.png" width="500" height="297" alt="Campus Cookies"><a href="#lineup">Flavors</a><a href="#order">Build a box</a></nav></header>
 <main>
 <section class="hero" aria-labelledby="hero-title">
 <div class="wrap hero-inner">
 <div>
 <p class="tagline">Major flavor. Major impact.</p>
-<h1 id="hero-title"><span>Cookie break,</span> <span>anyone?</span></h1>
+<h1 id="hero-title">The Friday <span>Cookie Drop</span></h1>
 <p>Brown butter, premium chocolate, crisp edges, soft centers, and a slightly obsessive commitment to getting every batch right.</p>
-<a class="button" href="#order">Build a cookie box</a>
+<a class="button" href="#pickup-date">Pick your Friday</a>
 </div>
 <figure class="hero-art">
 <img src="assets/cookie-baker.webp" alt="Campus Cookies baker holding a bowl of chocolate chip cookie dough" fetchpriority="high">
 </figure>
+</div>
+</section>
+<div class="drop-info"><p class="wrap"><span>$3.50 per cookie</span><span>Individually wrapped</span><span>Friday pickup</span></p></div>
+<section class="lineup" id="lineup" aria-labelledby="lineup-title">
+<div class="wrap">
+<h2 id="lineup-title">Meet the lineup</h2>
+<ul class="cookie-cards">
+<li class="cookie-card"><img src="assets/valedictorian.webp" alt="" width="660" height="660" loading="lazy"><h3>Valedictorian</h3><p>Brown butter chocolate chip</p></li>
+<li class="cookie-card"><img src="assets/all-nighter.webp" alt="" width="660" height="660" loading="lazy"><h3>All-Nighter</h3><p>Dark chocolate &amp; espresso</p></li>
+<li class="cookie-card"><img src="assets/party-animal.webp" alt="" width="660" height="660" loading="lazy"><h3>Party Animal</h3><p>Rainbow sprinkles</p></li>
+<li class="cookie-card"><img src="assets/overachiever.webp" alt="" width="660" height="660" loading="lazy"><h3>Overachiever</h3><p>Chocolate, caramel &amp; sea salt</p></li>
+<li class="cookie-card"><img src="assets/nutty-professor.webp" alt="" width="660" height="660" loading="lazy"><h3>Nutty Professor</h3><p>Chocolate &amp; peanut butter</p></li>
+</ul>
 </div>
 </section>
 <section class="wrap order" id="order" aria-labelledby="order-title">
