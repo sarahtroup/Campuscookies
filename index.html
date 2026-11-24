@@ -105,13 +105,23 @@ h2{color:var(--blue);font-size:clamp(1.65rem,4vw,3.55rem);line-height:.98;letter
 .order-cookie .flavor-stock{display:block;font-weight:750;margin-top:.4rem}
 .order-cookie .flavor-stock[hidden]{display:none}
 .gift-option{display:flex;gap:.65rem;align-items:center;max-width:17rem}
-.gift-option img{width:3.65rem;height:2.7rem;object-fit:cover;border-radius:.45rem}
+.gift-preview{position:relative;display:block;flex:none;width:5.4rem;aspect-ratio:1.6}
+.gift-preview img{position:absolute;left:50%;top:50%;width:79%;max-width:none;transform:translate(-50%,-50%) rotate(-90deg);clip-path:polygon(11.4% 14.8%,75% 14%,76.3% 47.5%,85.7% 41.5%,85% 45%,80% 49%,76.7% 50.8%,77.1% 54%,82% 53.5%,81% 55.6%,77.3% 56%,78.4% 84%,15.3% 86.2%,13.6% 58.6%,10.9% 60.3%,10.1% 58.3%,13.2% 57.3%,12.5% 51.2%,10.6% 49.2%,12.4% 50%)}
 .order-help,.pickup{font-size:.95rem;line-height:1.55;margin:1rem 0 0}
-.pickup p{margin-top:.35rem;overflow-wrap:anywhere}
+.pickup{margin:0;background:white;padding:clamp(1.8rem,5vw,3.25rem) 0}
+.pickup-inner{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1.25rem 2rem}
+.pickup h2{font-size:clamp(1.8rem,4.2vw,3.2rem)}
+.pickup address{font-style:normal;font-weight:750;margin-top:.7rem}
+.pickup p{margin-top:.5rem;overflow-wrap:anywhere}
+.pickup a{text-underline-offset:.2em}
+@media(max-width:42rem){.pickup-inner{grid-template-columns:1fr}}
 #contact{padding:1rem 0}
 #contact label{font-weight:800}
 #contact input{display:block;padding:.6rem;border:1px solid #9ab0cc;border-radius:.65rem;margin:.3rem 0 .75rem;color:inherit;font:inherit;width:min(100%,22rem)}
-.mission{background:#e7f4ff;padding:clamp(2rem,6vw,5rem) 0}
+.mission{background:#073573;color:white;padding:clamp(2rem,6vw,5rem) 0}
+.mission h2{color:#b8f0ff}
+.story .mission-lead{font-size:clamp(1.1rem,2.1vw,1.45rem);font-weight:780;line-height:1.38}
+.story .mission-credit{color:#b8f0ff}
 .story{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:clamp(1.5rem,6vw,4rem)}
 .story p{line-height:1.6;margin:1rem 0;max-width:48ch}
 .story>img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:1rem}
@@ -123,7 +133,7 @@ h2{color:var(--blue);font-size:clamp(1.65rem,4vw,3.55rem);line-height:.98;letter
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
-<header><nav class="wrap" aria-label="Main"><a class="home" href="#">Campus Cookies</a><a href="#order">Order</a></nav></header>
+<header><nav class="wrap" aria-label="Main"><a class="home" href="#">Campus Cookies</a><a href="#order">Order</a><a href="#pickup">Pickup</a></nav></header>
 <main id="main">
 <section class="hero" aria-labelledby="hero-title">
 <div class="wrap"><span class="hero-mark"><img class="hero-logo" src="assets/campus-cookies.png" alt="Campus Cookies" width="500" height="297"></span><h1 id="hero-title"><span>Major flavor.</span> Major impact.</h1><p>Brown butter. Big chocolate chunks.</p><a class="cta" href="#order">Order</a></div>
@@ -157,31 +167,39 @@ h2{color:var(--blue);font-size:clamp(1.65rem,4vw,3.55rem);line-height:.98;letter
 </div>
 <div class="order-summary">
 <p id="counts" role="status"></p>
-<label class="gift-option"><img src="assets/gift-box.webp" alt="" loading="lazy"><span><input type="checkbox" id="gift"> Add a gift box (+$5)</span></label>
+<label class="gift-option"><span class="gift-preview" aria-hidden="true"><img src="assets/gift-box.webp" alt="" width="488" height="650" loading="lazy"></span><span><input type="checkbox" id="gift"> Add a gift box (+$5)</span></label>
 <p><strong id="total"></strong> total</p>
 <button class="cta" id="save" type="submit" disabled>Prepare preorder email</button>
 </div>
 <p id="order-status" class="order-help" role="status" hidden></p>
-<p class="order-help" id="order-help">Your email app opens with your box details. Send the email to request a preorder. The bakery confirms availability.</p>
+<p class="order-help" id="order-help" hidden></p>
 </form>
-<div class="pickup">
-<h3>Preorder Monday. Pick up Friday.</h3>
-<p>Order by Monday at 2 p.m. Pick up Friday from 9:30 a.m. to 3 p.m. at a location of The Arc Jacksonville.</p>
-<p><a href="tel:+19043550155">904-355-0155</a> · <a href="mailto:campuscookiesjax@arcjacksonville.org">campuscookiesjax@arcjacksonville.org</a></p>
-<p>Planning a larger order? <a href="mailto:campuscookiesjax@arcjacksonville.org?subject=Campus%20Cookies%20catering%20inquiry">Ask about catering and corporate gifts.</a></p>
-</div>
 </div>
 </section>
 <section class="mission" aria-labelledby="mission-title">
 <div class="wrap story">
 <div>
 <h2 id="mission-title">Baked with Purpose</h2>
-<p>Our gourmet cookies are baked with purpose, creating job training and employment opportunities for people with intellectual and developmental differences.</p>
+<p class="mission-lead">Every batch creates job training and employment opportunities for people with intellectual and developmental differences.</p>
 <p>Campus Cookies began with a group of Career Campus students with intellectual and developmental differences who turned a college entrepreneurship class into a real-world business idea. Today, each batch creates opportunities to build culinary and baking skills through hands-on study, internships, and paid employment.</p>
-<strong>Powered by The Arc Jacksonville</strong>
+<strong class="mission-credit">Powered by The Arc Jacksonville</strong>
 <img class="footer-logo" src="assets/campus-cookies-reverse.png" alt="" loading="lazy">
 </div>
 <img src="assets/friday-cookie-tray.webp" alt="A Campus Cookies baker holding a finished tray of cookies" loading="lazy">
+</div>
+</section>
+<section class="pickup" id="pickup" aria-labelledby="pickup-title">
+<div class="wrap pickup-inner">
+<div>
+<h2 id="pickup-title">Friday pickup</h2>
+<address>The Arc Jacksonville<br>1050 N. Davis Street<br>Jacksonville, FL 32209</address>
+<p><a href="https://www.google.com/maps/search/?api=1&amp;query=1050+N.+Davis+Street,+Jacksonville,+FL+32209">Get directions</a></p>
+</div>
+<div>
+<p>Preorder by Monday at 2 p.m. and pick up on your selected Friday from 9:30 a.m. to 3 p.m. Eastern.</p>
+<p>Questions? <a href="tel:+19043550155">904-355-0155</a> · <a href="mailto:campuscookiesjax@arcjacksonville.org">campuscookiesjax@arcjacksonville.org</a></p>
+<p>Planning a larger order? <a href="mailto:campuscookiesjax@arcjacksonville.org?subject=Campus%20Cookies%20catering%20inquiry">Ask about catering and corporate gifts.</a></p>
+</div>
 </div>
 </section>
 </main>
@@ -234,7 +252,9 @@ if (serverOrdering) {
   orderName.disabled = orderEmail.disabled = false;
   orderName.required = orderEmail.required = true;
   save.textContent = "Request preorder";
-  document.querySelector("#order-help").textContent = "Your request reserves cookies for this Friday. The bakery will follow up by email.";
+  const orderHelp = document.querySelector("#order-help");
+  orderHelp.textContent = "Your request reserves cookies for this Friday. The bakery will follow up by email.";
+  orderHelp.hidden = false;
 }
 const pickupStart = "2027-01-01";
 const cutoffDays = 4;
@@ -405,7 +425,7 @@ form.addEventListener("submit", async event => {
     "Name:",
     "Phone:",
     `Friday pickup: ${pickupDate.selectedOptions[0].text} (9:30 a.m.–3 p.m. ET)`,
-    "Preferred pickup location:"
+    "Pickup at The Arc Jacksonville, 1050 N. Davis Street, Jacksonville, FL 32209."
   ];
   const subject = encodeURIComponent("Campus Cookies preorder");
   const body = encodeURIComponent(lines.join("\n"));
