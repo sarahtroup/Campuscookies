@@ -28,15 +28,24 @@ h1 span{display:block;font:700 .62em/.88 Oleo,'Brush Script MT',cursive;letter-s
 .hero p{margin:clamp(.85rem,2vw,1.3rem) auto .95rem;max-width:34ch;line-height:1.55;font-size:clamp(1rem,1.45vw,1.15rem)}
 .cta{display:inline-flex;align-items:center;justify-content:center;min-height:3.05rem;padding:.65rem 1.25rem;background:var(--blue);color:white;border-radius:99rem;text-decoration:none;font-weight:850}
 .cta:hover{background:#00357f}
-.cluster{position:relative;width:min(100%,89rem);margin:clamp(.5rem,1vw,1rem) auto 0;height:clamp(11rem,27vw,23rem)}
+.cluster{position:relative;width:min(100%,84rem);margin:clamp(.5rem,1vw,1rem) auto 0;height:clamp(10.5rem,25.7vw,22rem)}
 .cookie{position:absolute;left:var(--x);top:var(--y);width:var(--w);aspect-ratio:1;mix-blend-mode:multiply;clip-path:circle(43%);transform:rotate(var(--angle));object-fit:contain;z-index:var(--z,1)}
-.cookie:nth-child(1){--x:1%;--y:14%;--w:22%;--angle:-14deg;--delay:0ms}
-.cookie:nth-child(2){--x:20%;--y:1%;--w:22%;--angle:12deg;--z:2;--delay:70ms}
-.cookie:nth-child(3){--x:39%;--y:11%;--w:22%;--angle:-8deg;--z:4;--delay:110ms}
-.cookie:nth-child(4){--x:58%;--y:1%;--w:22%;--angle:13deg;--z:3;--delay:160ms}
-.cookie:nth-child(5){--x:78%;--y:18%;--w:22%;--angle:-13deg;--delay:200ms}
-@keyframes cookie-arrive{from{transform:translateY(25px) rotate(calc(var(--angle) + 12deg));opacity:.35}70%{transform:translateY(-5px) rotate(calc(var(--angle) - 2deg));opacity:1}to{transform:rotate(var(--angle));opacity:1}}
-@media(prefers-reduced-motion:no-preference){.cookie{animation:cookie-arrive 760ms cubic-bezier(.2,.75,.25,1) var(--delay) both}}
+.cookie:nth-child(1){--x:1%;--y:14%;--w:22%;--angle:-14deg;--phase:0ms}
+.cookie:nth-child(2){--x:20%;--y:1%;--w:22%;--angle:12deg;--z:2;--phase:-750ms}
+.cookie:nth-child(3){--x:39%;--y:11%;--w:22%;--angle:-8deg;--z:4;--phase:-1500ms}
+.cookie:nth-child(4){--x:58%;--y:1%;--w:22%;--angle:13deg;--z:3;--phase:-2250ms}
+.cookie:nth-child(5){--x:78%;--y:18%;--w:22%;--angle:-13deg;--phase:-3000ms}
+@keyframes cookie-bob {
+  0%,100% { translate:0 0; transform:rotate(var(--angle)); }
+  50% { translate:0 clamp(-13px,-1vw,-7px); transform:rotate(calc(var(--angle) + 4deg)); }
+}
+.motion-row{display:flex;justify-content:flex-end;padding-bottom:.55rem}.motion-row:has([hidden]){display:none}
+.motion-toggle{border:0;background:transparent;color:var(--ink);font:inherit;font-size:.8rem;font-weight:750;text-decoration:underline;text-underline-offset:.2em;cursor:pointer;min-height:2rem;padding:.15rem .3rem}
+.motion-toggle:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+@media(prefers-reduced-motion:no-preference){
+  .cluster[data-motion] .cookie{animation:cookie-bob 3.8s ease-in-out var(--phase) infinite}
+  .cluster[data-motion="paused"] .cookie{animation-play-state:paused}
+}
 .drop{padding:clamp(1.65rem,4vw,3.8rem) 0;background:white}
 .drop-inner{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:1rem 2rem}
 h2{color:var(--blue);font-size:clamp(1.65rem,4vw,3.55rem);line-height:.98;letter-spacing:-.06em;font-weight:920}
@@ -45,7 +54,7 @@ h2{color:var(--blue);font-size:clamp(1.65rem,4vw,3.55rem);line-height:.98;letter
 @media(max-width:42rem){
  nav{gap:.75rem}nav a{font-size:.83rem}
  h1{font-size:clamp(3rem,12vw,5.25rem)}
- .cluster{height:clamp(10.5rem,37vw,17rem);width:111%;margin-left:-5.5%}
+ .cluster{height:clamp(10rem,35vw,16rem);width:111%;margin-left:-5.5%}
  .cookie:nth-child(1),.cookie:nth-child(5){top:28%}
  .cookie:nth-child(2),.cookie:nth-child(4){top:13%}
  .cookie:nth-child(3){top:20%}
@@ -117,13 +126,14 @@ h2{color:var(--blue);font-size:clamp(1.65rem,4vw,3.55rem);line-height:.98;letter
 <main id="main">
 <section class="hero" aria-labelledby="hero-title">
 <div class="wrap"><img class="hero-logo" src="assets/campus-cookies.png" alt="Campus Cookies" width="500" height="297"><h1 id="hero-title"><span>Major flavor.</span> Major impact.</h1><p>Brown butter. Big chocolate chunks. Soft centers.</p><a class="cta" href="#order">Order</a></div>
-<figure class="cluster" aria-label="Five Campus Cookies flavors">
+<figure class="cluster" id="hero-cookies" aria-label="Five Campus Cookies flavors">
 <img class="cookie" src="assets/all-nighter.webp" width="660" height="660" alt="All-Nighter">
 <img class="cookie" src="assets/overachiever.webp" width="660" height="660" alt="Overachiever">
 <img class="cookie" src="assets/valedictorian.webp" width="660" height="660" alt="Valedictorian">
 <img class="cookie" src="assets/party-animal.webp" width="660" height="660" alt="Party Animal">
 <img class="cookie" src="assets/nutty-professor.webp" width="660" height="660" alt="Nutty Professor">
 </figure>
+<div class="wrap motion-row"><button type="button" class="motion-toggle" id="cookie-motion" aria-controls="hero-cookies" hidden>Pause cookie motion</button></div>
 </section>
 <section class="order" id="order" aria-labelledby="order-title">
 <div class="drop-banner"><div class="wrap"><h2 id="order-title">Taste What’s Possible</h2></div></div>
@@ -174,6 +184,25 @@ h2{color:var(--blue);font-size:clamp(1.65rem,4vw,3.55rem);line-height:.98;letter
 </section>
 </main>
 <script>
+const cookieCluster = document.querySelector("#hero-cookies");
+const motionButton = document.querySelector("#cookie-motion");
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+function syncCookieMotion() {
+  motionButton.hidden = reducedMotion.matches;
+  if (reducedMotion.matches) {
+    delete cookieCluster.dataset.motion;
+    return;
+  }
+  cookieCluster.dataset.motion = cookieCluster.dataset.motion || "running";
+  motionButton.textContent = cookieCluster.dataset.motion === "paused" ? "Play cookie motion" : "Pause cookie motion";
+}
+motionButton.addEventListener("click", () => {
+  cookieCluster.dataset.motion = cookieCluster.dataset.motion === "paused" ? "running" : "paused";
+  syncCookieMotion();
+});
+reducedMotion.addEventListener("change", syncCookieMotion);
+syncCookieMotion();
+
 const sizes = [6, 13, 24, 36, 48];
 const pricePerCookie = 350;
 const giftPrice = 500;
