@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Campus Cookies | Build a Cookie Box</title>
+<style>
+:root { color-scheme: light; --ink:#083b91; --sky:#a2dfeb; --gold:#ffcc68; --paper:#fffdf5; --line:#a9bedb; font-family:system-ui,sans-serif; color:var(--ink); background:var(--paper); }
+* { box-sizing:border-box; }
+body { margin:0; }
+.wrap { width:min(100% - 2.5rem, 70rem); margin-inline:auto; }
+header { background:var(--sky); padding:1.2rem 0; border-bottom:1px solid var(--ink); }
+nav { display:flex; justify-content:space-between; align-items:center; gap:1rem; }
+a { color:inherit; font-weight:750; }
+.hero { background:var(--sky); padding:clamp(3rem, 9vw, 7rem) 0; }
+h1,h2,h3,p { margin:0; }
+h1,h2 { font-family:Georgia,serif; line-height:1; }
+h1 { font-size:clamp(3rem, 9vw, 7rem); letter-spacing:-.055em; max-width:11ch; }
+h2 { font-size:clamp(2.2rem, 5vw, 3.6rem); letter-spacing:-.035em; }
+.hero p, .mission p { margin-block:1.25rem; max-width:45ch; font-size:1.15rem; line-height:1.55; }
+.button { display:inline-block; border:2px solid var(--ink); border-radius:.4rem; background:var(--gold); color:var(--ink); padding:.75rem 1rem; text-decoration:none; font:inherit; font-weight:800; cursor:pointer; }
+.button:disabled { opacity:.55; cursor:default; }
+section.order, .mission { padding-block:clamp(2.5rem, 7vw, 5rem); }
+.order > p { margin-top:1rem; }
+form { display:grid; grid-template-columns:minmax(0, 1.6fr) minmax(15rem, 1fr); gap:2rem; margin-top:2rem; align-items:start; }
+fieldset { margin:0 0 1.4rem; padding:0; border:0; min-width:0; }
+legend { font-weight:800; margin-bottom:.8rem; }
+.sizes { display:grid; grid-template-columns:repeat(auto-fit,minmax(5.7rem,1fr)); gap:.5rem; }
+.size { display:flex; flex-direction:column; align-items:center; gap:.3rem; padding:.65rem .25rem; border:1px solid var(--line); border-radius:.4rem; cursor:pointer; text-align:center; }
+.size:has(:checked) { border-color:var(--ink); background:var(--sky); }
+input { accent-color:var(--ink); }
+.flavor { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.8rem 0; border-bottom:1px solid var(--line); }
+.flavor small { display:block; font-size:.9rem; margin-top:.2rem; }
+.flavor input { width:4.4rem; padding:.45rem; font:inherit; color:inherit; border:1px solid var(--line); border-radius:.3rem; }
+.summary { background:#e2f6fa; padding:1.4rem; border-radius:.65rem; display:grid; gap:1rem; }
+.summary label { display:flex; align-items:center; gap:.45rem; }
+.summary p { line-height:1.4; }
+.total { font-size:1.4rem; }
+.mission { background:var(--ink); color:white; }
+@media(max-width:42rem) { form { grid-template-columns:1fr; gap:.75rem; } }
+</style>
+</head>
+<body>
+<header><nav class="wrap" aria-label="Main"><strong>Campus Cookies</strong><a href="#order">Build a box</a></nav></header>
+<main>
+<section class="hero" aria-labelledby="hero-title">
+<div class="wrap">
+<h1 id="hero-title">Major flavor. Major impact.</h1>
+<p>Five gourmet flavors, $3.50 per cookie. Every cookie comes individually wrapped.</p>
+<a class="button" href="#order">Build a cookie box</a>
+</div>
+</section>
+<section class="wrap order" id="order" aria-labelledby="order-title">
+<h2 id="order-title">Build your box</h2>
+<p>Choose a box size, then fill it with your favorite flavors.</p>
+<form id="box">
+<div>
+<fieldset><legend>Box size</legend><div class="sizes" id="sizes"></div></fieldset>
+<fieldset><legend>Cookie flavors</legend><div id="flavors"></div></fieldset>
+</div>
+<div class="summary">
+<h3>Your box</h3>
+<label><input type="checkbox" id="gift"> Add a gift box (+$5.00)</label>
+<p id="counts" role="status"></p>
+<p class="total">Box total <strong id="total"></strong></p>
+<button class="button" id="save" type="submit" disabled>Download box summary</button>
+<p>Save your selections for reference. Online checkout is coming later.</p>
+</div>
+</form>
+</section>
+<section class="mission" aria-labelledby="mission-title">
+<div class="wrap">
+<h2 id="mission-title">Baked with Purpose</h2>
+<p>Our gourmet cookies are baked with purpose, creating job training and employment opportunities for people with intellectual and developmental differences.</p>
+<strong>Powered by The Arc Jacksonville</strong>
+</div>
+</section>
+</main>
+<script>
+const sizes = [6, 13, 24, 36, 48];
+const pricePerCookie = 350;
+const giftPrice = 500;
+const flavors = [
+  ["Valedictorian", "Brown butter, chocolate chips and a touch of salt."],
+  ["All-Nighter", "Dark chocolate, espresso with a touch of sea salt."],
+  ["Party Animal", "Brown butter cookie dressed up with sprinkles."],
+  ["Overachiever", "Brown butter, chocolate, caramel, and sea salt."],
+  ["Nutty Professor", "Rich chocolate meets peanut butter."]
+];
+const money = cents => new Intl.NumberFormat("en-US", {style:"currency", currency:"USD"}).format(cents / 100);
+const form = document.querySelector("#box");
+const gift = document.querySelector("#gift");
+document.querySelector("#sizes").innerHTML = sizes.map(size =>
+  `<label class="size"><input type="radio" name="size" value="${size}" ${size === 6 ? "checked" : ""}><strong>${size} cookies</strong><span>${money(size * pricePerCookie)}</span></label>`
+).join("");
+document.querySelector("#flavors").innerHTML = flavors.map(([name, description], index) =>
+  `<label class="flavor"><span><strong>${name}</strong><small>${description}</small></span><input class="quantity" name="flavor-${index}" type="number" min="0" max="48" step="1" value="0" inputmode="numeric" aria-label="${name} quantity"></label>`
+).join("");
+const quantities = [...form.querySelectorAll(".quantity")];
+function boxState() {
+  const size = Number(form.elements.size.value);
+  const selected = quantities.map(field => Number(field.value));
+  const count = selected.reduce((sum, quantity) => sum + quantity, 0);
+  const total = size * pricePerCookie + (gift.checked ? giftPrice : 0);
+  return {size, selected, count, total};
+}
+function render() {
+  const {size, count, total} = boxState();
+  const extra = count - size;
+  document.querySelector("#counts").textContent = extra > 0
+    ? `Remove ${extra} to fit this box.`
+    : `${count} of ${size} cookies selected.`;
+  document.querySelector("#total").textContent = money(total);
+  document.querySelector("#save").disabled = count !== size || !form.checkValidity();
+}
+form.addEventListener("input", render);
+form.addEventListener("submit", event => {
+  event.preventDefault();
+  const {size, selected, count, total} = boxState();
+  if (count !== size || !form.checkValidity()) return;
+  const lines = [
+    "Campus Cookies",
+    `Box of ${size} individually wrapped cookies`,
+    ...flavors.flatMap(([name], index) => selected[index] ? [`${selected[index]} × ${name}`] : []),
+    `Gift box: ${gift.checked ? money(giftPrice) : "No"}`,
+    `Box total: ${money(total)}`
+  ];
+  const url = URL.createObjectURL(new Blob([lines.join("\n")], {type:"text/plain"}));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "campus-cookies-box.txt";
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+render();
+</script>
+</body>
+</html>
