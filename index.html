@@ -41,31 +41,16 @@ input { accent-color:var(--ink); }
 .mission { background:var(--ink); color:white; }
 @media(max-width:42rem) { form { grid-template-columns:1fr; gap:.75rem; } }
 .site-logo { display:block; width:clamp(8rem, 19vw, 12rem); height:auto; }
-.hero {
-  overflow:hidden;
-  color:var(--paper);
-  background-color:#00368f;
-  background-image:repeating-linear-gradient(0deg, transparent 0 35px, #ffffff14 35px 36px);
-  padding-block:clamp(2.4rem,6vw,5.2rem);
-}
-.hero-inner { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr); align-items:center; gap:clamp(1.7rem,5vw,4.2rem); }
-.hero .tagline {
-  display:inline-block; margin:0 0 1.25rem; padding:.55rem 1.65rem .55rem .75rem;
-  background:var(--gold); color:#102851; clip-path:polygon(0 0,100% 0,91% 50%,100% 100%,0 100%);
-  font-size:.88rem; font-weight:850; letter-spacing:.075em; text-transform:uppercase;
-}
-.hero h1 { font:950 clamp(2.9rem,6.75vw,6.3rem)/.88 system-ui,sans-serif; letter-spacing:-.07em; text-transform:uppercase; }
-.hero h1 span { display:block; color:var(--gold); margin-top:.13em; }
-.hero-copy { max-width:39ch; }
-.hero .button { border:2px solid #102851; border-radius:.25rem; padding:.84rem 1.25rem; box-shadow:.27rem .27rem 0 var(--paper); }
-.hero .button:hover { background:var(--sky); }
-.hero-art {
-  position:relative; width:min(100%,25rem); margin:0 auto; padding:.65rem;
-  border-radius:.35rem; background:var(--paper); box-shadow:.7rem .7rem 0 #041e56;
-  transform:rotate(4deg);
-}
-.hero-art img { display:block; width:100%; aspect-ratio:4/4.2; object-fit:cover; object-position:center 52%; }
-.hero-art figcaption { padding:.55rem .25rem .12rem; color:#102851; font-weight:850; text-align:center; }
+.hero { background:var(--paper); color:#102851; padding-block:clamp(1.75rem,4.2vw,4.2rem); }
+.hero-inner { display:grid; grid-template-columns:minmax(0,.72fr) minmax(0,1.28fr); align-items:center; gap:clamp(1.35rem,4vw,3.8rem); }
+.hero h1 { font:900 clamp(2.75rem,5.5vw,5.3rem)/.96 system-ui,sans-serif; letter-spacing:-.075em; color:var(--ink); max-width:none; }
+.hero h1 span { display:block; }
+.hero .tagline { margin:0 0 .85rem; color:var(--ink); font-size:.92rem; font-weight:800; }
+.hero .hero-copy { max-width:36ch; margin-block:1rem 1.25rem; }
+.hero .button { background:var(--ink); color:white; border-color:var(--ink); border-radius:99rem; padding:.85rem 1.25rem; }
+.hero .button:hover { background:#00368f; border-color:#00368f; }
+.hero-art { min-width:0; margin:0; }
+.hero-art img { display:block; width:100%; height:auto; border-radius:1rem; }
 .drop-info {
   background:var(--gold); color:#102851; padding:.78rem 0;
   border-block:.22rem double #102851;
@@ -101,8 +86,7 @@ input { accent-color:var(--ink); }
   .hero-art { max-width:26rem; width:100%; margin-inline:auto; }
   .hero { padding-block:2rem; }
   .hero-inner { gap:1.8rem; }
-  .hero h1 { font-size:clamp(2.65rem,11vw,5.2rem); }
-  .hero-art { transform:none; width:min(100%,22rem); }
+  .hero h1 { font-size:clamp(2.45rem,9.5vw,4.1rem); }
   nav { gap:.65rem; }
   .site-logo { width:clamp(6.2rem,27vw,8rem); }
 }
@@ -115,20 +99,19 @@ input { accent-color:var(--ink); }
 <div class="wrap hero-inner">
 <div>
 <p class="tagline">The Friday Cookie Drop</p>
-<h1 id="hero-title">Class dismissed. <span>Cookies are in.</span></h1>
-<p class="hero-copy">Brown butter, crisp edges, soft centers. Pick your Friday and pack a box with your campus favorites.</p>
+<h1 id="hero-title">Major flavor. <span>Major impact.</span></h1>
+<p class="hero-copy">Brown butter, premium chocolate, crisp edges, and soft centers. Build a box of your favorites for Friday pickup.</p>
 <a class="button" href="#pickup-date">Pick your Friday</a>
 </div>
 <figure class="hero-art">
-<img src="assets/gift-box.webp" alt="Campus Cookies gift box with a blue ribbon and wrapped cookies visible through the window" width="488" height="650" fetchpriority="high">
-<figcaption>Gift box with bow · +$5</figcaption>
+<img src="assets/friday-cookie-tray.webp" alt="A Campus Cookies baker smiles as she holds a tray of freshly baked cookies" width="1200" height="1000" fetchpriority="high">
 </figure>
 </div>
 </section>
 <div class="drop-info"><p class="wrap"><span>$3.50 per cookie</span><span>Individually wrapped</span><span>Preorder by Monday at 2 p.m. ET</span></p></div>
 <section class="lineup" id="lineup" aria-labelledby="lineup-title">
 <div class="wrap">
-<h2 id="lineup-title">The cookie roster</h2>
+<h2 id="lineup-title">Meet the lineup</h2>
 <ul class="cookie-cards">
 <li class="cookie-card"><img src="assets/valedictorian.webp" alt="" width="660" height="660" loading="lazy"><h3>Valedictorian</h3><p>Brown butter chocolate chip</p></li>
 <li class="cookie-card"><img src="assets/all-nighter.webp" alt="" width="660" height="660" loading="lazy"><h3>All-Nighter</h3><p>Dark chocolate &amp; espresso</p></li>
@@ -179,7 +162,6 @@ input { accent-color:var(--ink); }
 <div class="wrap story">
 <div>
 <h2 id="mission-title">Baked with Purpose</h2>
-<p><strong>Major flavor. Major impact.</strong></p>
 <p>Our gourmet cookies are baked with purpose, creating job training and employment opportunities for people with intellectual and developmental differences.</p>
 <p>Campus Cookies began with a group of Career Campus students with intellectual and developmental differences who turned a college entrepreneurship class into a real-world business idea. Today, each batch creates opportunities to build culinary and baking skills through hands-on study, internships, and paid employment.</p>
 <strong>Powered by The Arc Jacksonville</strong>
