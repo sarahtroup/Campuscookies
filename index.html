@@ -41,24 +41,31 @@ input { accent-color:var(--ink); }
 .site-logo { display:block; width:clamp(8rem, 19vw, 12rem); height:auto; }
 .hero { overflow:hidden; }
 .hero-inner { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); align-items:center; gap:2rem; }
-.hero-art { display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); grid-template-rows:repeat(10,minmax(0,1fr)); aspect-ratio:1.12; isolation:isolate; }
-.hero-art img { width:100%; height:100%; object-fit:contain; mix-blend-mode:multiply; }
-.hero-art img:first-child { grid-area:1 / 1 / 9 / 10; z-index:2; transform:rotate(-12deg); }
-.hero-art img:nth-child(2) { grid-area:2 / 7 / 8 / 13; transform:rotate(14deg); }
-.hero-art img:nth-child(3) { grid-area:6 / 6 / 11 / 12; transform:rotate(10deg); z-index:3; }
+.hero { padding-block:clamp(2.5rem, 6vw, 5rem); background:linear-gradient(115deg,var(--sky) 70%,#d8f7ff 70%); }
+.hero h1 { max-width:10ch; font-size:clamp(3.4rem,7.4vw,7rem); }
+.hero h1 span { display:inline-block; }
+.hero h1 span:last-child { background:linear-gradient(transparent 72%,var(--gold) 72% 93%,transparent 93%); }
+.hero .tagline { margin:0 0 1rem; font-size:1rem; font-weight:850; letter-spacing:.07em; text-transform:uppercase; }
+.hero .button { box-shadow:.24rem .24rem 0 var(--ink); }
+.hero-art { margin:0; padding:.55rem; border:2px solid var(--ink); background:var(--paper); border-radius:1.25rem; box-shadow:.6rem .6rem 0 var(--gold); transform:rotate(2deg); }
+.hero-art img { display:block; width:100%; aspect-ratio:5/4; object-fit:cover; object-position:center 48%; border-radius:.75rem; }
+.pickup-field label { display:block; font-weight:800; margin-bottom:.5rem; }
+.pickup-field select { width:100%; max-width:28rem; padding:.72rem .6rem; color:inherit; background:white; border:1px solid var(--ink); border-radius:.4rem; font:inherit; }
+.pickup-field p { margin-top:.45rem; line-height:1.45; }
 .flavor-image { width:4.7rem; height:4.7rem; object-fit:contain; flex:none; mix-blend-mode:multiply; }
 .flavor-copy { flex:1; }
 .pickup { margin:1rem 0; line-height:1.6; }
 .story { display:grid; grid-template-columns:1fr 1fr; gap:clamp(1.5rem,5vw,4rem); align-items:center; }
 .story img, .gift-photo { display:block; width:100%; border-radius:.65rem; object-fit:cover; }
 .story img { aspect-ratio:4/3; }
-.gift-photo { aspect-ratio: 2/1; }
+.gift-photo { aspect-ratio: 4/3; object-fit:contain; background:#f8ead5; }
 .footer-logo { display:block; margin-top:1.5rem; width:11rem; max-width:100%; height:auto; }
 @media(max-width:42rem) {
   .hero-inner, .story { grid-template-columns:1fr; }
   .hero-art { max-width:26rem; width:100%; margin-inline:auto; }
   .hero { padding-block:2rem; }
-  .hero-inner { gap:.8rem; }
+  .hero-inner { gap:1.8rem; }
+  .hero-art { transform:none; }
 }
 </style>
 </head>
@@ -68,33 +75,37 @@ input { accent-color:var(--ink); }
 <section class="hero" aria-labelledby="hero-title">
 <div class="wrap hero-inner">
 <div>
-<h1 id="hero-title">Major flavor. Major impact.</h1>
+<p class="tagline">Major flavor. Major impact.</p>
+<h1 id="hero-title"><span>Cookie break,</span> <span>anyone?</span></h1>
 <p>Brown butter, premium chocolate, crisp edges, soft centers, and a slightly obsessive commitment to getting every batch right.</p>
 <a class="button" href="#order">Build a cookie box</a>
 </div>
-<div class="hero-art" aria-hidden="true">
-<img src="assets/valedictorian.webp" alt="" fetchpriority="high">
-<img src="assets/all-nighter.webp" alt="">
-<img src="assets/party-animal.webp" alt="">
-</div>
+<figure class="hero-art">
+<img src="assets/cookie-baker.webp" alt="Campus Cookies baker holding a bowl of chocolate chip cookie dough" fetchpriority="high">
+</figure>
 </div>
 </section>
 <section class="wrap order" id="order" aria-labelledby="order-title">
 <h2 id="order-title">Build your box</h2>
-<p>Choose a box size, then fill it with your favorite flavors. Cookies are $3.50 each and individually wrapped.</p>
+<p>Pick your Friday, choose a box size, then fill it with your favorite flavors. Cookies are $3.50 each and individually wrapped.</p>
 <form id="box">
 <div>
+<fieldset class="pickup-field">
+<label for="pickup-date">Friday pickup date</label>
+<select id="pickup-date" name="pickupDate" required aria-describedby="pickup-note"><option value="">Select a Friday</option></select>
+<p id="pickup-note">Friday pickup starts in January 2027, from 9:30 a.m. to 3 p.m. ET.</p>
+</fieldset>
 <fieldset><legend>Box size</legend><div class="sizes" id="sizes"></div></fieldset>
 <fieldset><legend>Cookie flavors</legend><div id="flavors"></div></fieldset>
 </div>
 <div class="summary">
 <h3>Your box</h3>
-<img class="gift-photo" src="assets/wrapped.webp" alt="Campus Cookies in individual wrappers" loading="lazy">
+<img class="gift-photo" src="assets/gift-box.webp" alt="Campus Cookies gift box tied with a blue bow" loading="lazy">
 <label><input type="checkbox" id="gift"> Add a gift box with bow (+$5.00)</label>
 <p id="counts" role="status"></p>
 <p class="total">Box total <strong id="total"></strong></p>
 <button class="button" id="save" type="submit" disabled>Prepare preorder email</button>
-<p>Your email app opens with your box details. Send the email to request your preorder.</p>
+<p>Your email app opens with your box details. Send the email to request a preorder. The bakery confirms availability.</p>
 </div>
 </form>
 <div class="pickup">
@@ -131,6 +142,43 @@ const flavors = [
 const money = cents => new Intl.NumberFormat("en-US", {style:"currency", currency:"USD"}).format(cents / 100);
 const form = document.querySelector("#box");
 const gift = document.querySelector("#gift");
+const pickupDate = document.querySelector("#pickup-date");
+const pickupStart = "2027-01-01";
+const cutoffDays = 4;
+const cutoffHour = 14;
+const easternClock = new Intl.DateTimeFormat("en-US", {
+  timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit",
+  hour: "2-digit", hourCycle: "h23"
+});
+const pickupLabel = new Intl.DateTimeFormat("en-US", {
+  timeZone: "UTC", weekday: "long", month: "long", day: "numeric", year: "numeric"
+});
+function availableFridays(now = new Date()) {
+  const parts = Object.fromEntries(easternClock.formatToParts(now).map(({type, value}) => [type, value]));
+  const today = `${parts.year}-${parts.month}-${parts.day}`;
+  const day = new Date(`${today > pickupStart ? today : pickupStart}T00:00:00Z`);
+  day.setUTCDate(day.getUTCDate() + (5 - day.getUTCDay() + 7) % 7);
+  const dates = [];
+  while (dates.length < 8) {
+    const deadline = new Date(day);
+    deadline.setUTCDate(deadline.getUTCDate() - cutoffDays);
+    const cutoff = deadline.toISOString().slice(0, 10);
+    if (today < cutoff || (today === cutoff && Number(parts.hour) < cutoffHour)) {
+      dates.push({value: day.toISOString().slice(0, 10), label: pickupLabel.format(day)});
+    }
+    day.setUTCDate(day.getUTCDate() + 7);
+  }
+  return dates;
+}
+function refreshPickupDates() {
+  const selected = pickupDate.value;
+  const dates = availableFridays();
+  const values = ["", ...dates.map(({value}) => value)];
+  if (values.join() === [...pickupDate.options].map(({value}) => value).join()) return;
+  pickupDate.replaceChildren(new Option("Select a Friday", ""), ...dates.map(({label, value}) => new Option(label, value)));
+  pickupDate.value = values.includes(selected) ? selected : "";
+}
+refreshPickupDates();
 document.querySelector("#sizes").innerHTML = sizes.map(size =>
   `<label class="size"><input type="radio" name="size" value="${size}" ${size === 6 ? "checked" : ""}><strong>${size} cookies</strong><span>${money(size * pricePerCookie)}</span></label>`
 ).join("");
@@ -146,19 +194,27 @@ function boxState() {
   return {size, selected, count, total};
 }
 function render() {
+  refreshPickupDates();
   const {size, count, total} = boxState();
   const extra = count - size;
   document.querySelector("#counts").textContent = extra > 0
     ? `Remove ${extra} to fit this box.`
-    : `${count} of ${size} cookies selected.`;
+    : count === size ? "Your box is full!" : `${size - count} more to fill your box.`;
   document.querySelector("#total").textContent = money(total);
   document.querySelector("#save").disabled = count !== size || !form.checkValidity();
 }
 form.addEventListener("input", render);
+window.addEventListener("focus", render);
+setInterval(render, 30_000);
 form.addEventListener("submit", event => {
   event.preventDefault();
+  refreshPickupDates();
   const {size, selected, count, total} = boxState();
-  if (count !== size || !form.checkValidity()) return;
+  if (!pickupDate.value || count !== size || !form.checkValidity()) {
+    render();
+    form.reportValidity();
+    return;
+  }
   const lines = [
     "Hello Campus Cookies, I’d like to request a preorder.",
     "",
@@ -169,7 +225,8 @@ form.addEventListener("submit", event => {
     "",
     "Name:",
     "Phone:",
-    "Preferred Friday pickup date and location:"
+    `Friday pickup: ${pickupDate.selectedOptions[0].text} (9:30 a.m.–3 p.m. ET)`,
+    "Preferred pickup location:"
   ];
   const subject = encodeURIComponent("Campus Cookies preorder");
   const body = encodeURIComponent(lines.join("\n"));
