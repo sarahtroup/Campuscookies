@@ -35,6 +35,8 @@ input { accent-color:var(--ink); }
 .summary { background:#e2f6fa; padding:1.4rem; border-radius:.65rem; display:grid; gap:1rem; }
 .summary label { display:flex; align-items:center; gap:.45rem; }
 .summary p { line-height:1.4; }
+#contact input { display:block; width:100%; font:inherit; padding:.45rem; margin:.3rem 0 .7rem; }
+.flavor-stock { font-weight:750; }
 .total { font-size:1.4rem; }
 .mission { background:var(--ink); color:white; }
 @media(max-width:42rem) { form { grid-template-columns:1fr; gap:.75rem; } }
@@ -100,12 +102,19 @@ input { accent-color:var(--ink); }
 </div>
 <div class="summary">
 <h3>Your box</h3>
+<div id="contact" hidden>
+<label for="order-name">Pickup name</label>
+<input id="order-name" autocomplete="name" maxlength="100" disabled>
+<label for="order-email">Email</label>
+<input id="order-email" type="email" autocomplete="email" maxlength="254" disabled>
+</div>
+<p id="order-status" role="status" hidden></p>
 <img class="gift-photo" src="assets/gift-box.webp" alt="Campus Cookies gift box tied with a blue bow" loading="lazy">
 <label><input type="checkbox" id="gift"> Add a gift box with bow (+$5.00)</label>
 <p id="counts" role="status"></p>
 <p class="total">Box total <strong id="total"></strong></p>
 <button class="button" id="save" type="submit" disabled>Prepare preorder email</button>
-<p>Your email app opens with your box details. Send the email to request a preorder. The bakery confirms availability.</p>
+<p id="order-help">Your email app opens with your box details. Send the email to request a preorder. The bakery confirms availability.</p>
 </div>
 </form>
 <div class="pickup">
@@ -143,6 +152,23 @@ const money = cents => new Intl.NumberFormat("en-US", {style:"currency", currenc
 const form = document.querySelector("#box");
 const gift = document.querySelector("#gift");
 const pickupDate = document.querySelector("#pickup-date");
+const serverOrdering = Boolean(document.querySelector('meta[name="campus-inventory"]'));
+const orderName = document.querySelector("#order-name");
+const orderEmail = document.querySelector("#order-email");
+const orderStatus = document.querySelector("#order-status");
+const save = document.querySelector("#save");
+let availabilityDate = "";
+let remaining = null;
+let pending = false;
+let lastRequest = null;
+if (serverOrdering) {
+  document.querySelector("#contact").hidden = false;
+  orderStatus.hidden = false;
+  orderName.disabled = orderEmail.disabled = false;
+  orderName.required = orderEmail.required = true;
+  save.textContent = "Request preorder";
+  document.querySelector("#order-help").textContent = "Your request reserves cookies for this Friday. The bakery will follow up by email.";
+}
 const pickupStart = "2027-01-01";
 const cutoffDays = 4;
 const cutoffHour = 14;
@@ -183,9 +209,26 @@ document.querySelector("#sizes").innerHTML = sizes.map(size =>
   `<label class="size"><input type="radio" name="size" value="${size}" ${size === 6 ? "checked" : ""}><strong>${size} cookies</strong><span>${money(size * pricePerCookie)}</span></label>`
 ).join("");
 document.querySelector("#flavors").innerHTML = flavors.map(([name, description, photo], index) =>
-  `<label class="flavor"><img class="flavor-image" src="assets/${photo}.webp" alt="" loading="lazy"><span class="flavor-copy"><strong>${name}</strong><small>${description}</small></span><input class="quantity" name="flavor-${index}" type="number" min="0" max="48" step="1" value="0" inputmode="numeric" aria-label="${name} quantity"></label>`
+  `<label class="flavor"><img class="flavor-image" src="assets/${photo}.webp" alt="" loading="lazy"><span class="flavor-copy"><strong>${name}</strong><small>${description}</small><small class="flavor-stock" hidden></small></span><input class="quantity" name="flavor-${index}" type="number" min="0" max="48" step="1" value="0" inputmode="numeric" aria-label="${name} quantity"></label>`
 ).join("");
 const quantities = [...form.querySelectorAll(".quantity")];
+const stockLabels = [...form.querySelectorAll(".flavor-stock")];
+async function loadStock() {
+  const date = pickupDate.value;
+  availabilityDate = date;
+  remaining = null;
+  render();
+  if (!date) return;
+  try {
+    const response = await fetch(`api/availability?pickup=${encodeURIComponent(date)}`);
+    if (!response.ok) throw Error("Availability unavailable.");
+    const result = await response.json();
+    if (availabilityDate === date && pickupDate.value === date) remaining = result;
+  } catch {
+    if (pickupDate.value === date) orderStatus.textContent = "Availability could not load. Choose the date again to retry.";
+  }
+  render();
+}
 function boxState() {
   const size = Number(form.elements.size.value);
   const selected = quantities.map(field => Number(field.value));
@@ -195,24 +238,70 @@ function boxState() {
 }
 function render() {
   refreshPickupDates();
-  const {size, count, total} = boxState();
+  const {size, selected, count, total} = boxState();
   const extra = count - size;
   document.querySelector("#counts").textContent = extra > 0
     ? `Remove ${extra} to fit this box.`
     : count === size ? "Your box is full!" : `${size - count} more to fill your box.`;
   document.querySelector("#total").textContent = money(total);
-  document.querySelector("#save").disabled = count !== size || !form.checkValidity();
+  const stockReady = availabilityDate === pickupDate.value && remaining !== null;
+  const exceedsStock = stockReady && flavors.some(([, , key], index) => selected[index] > remaining[key]);
+  stockLabels.forEach((label, index) => {
+    label.hidden = !stockReady;
+    if (stockReady) {
+      const amount = remaining[flavors[index][2]];
+      label.textContent = amount === 0 ? "Sold out for this Friday" : `${amount} available this Friday`;
+    }
+  });
+  save.disabled = pending || count !== size || !form.checkValidity()
+    || (serverOrdering && (!stockReady || exceedsStock));
 }
 form.addEventListener("input", render);
 window.addEventListener("focus", render);
 setInterval(render, 30_000);
-form.addEventListener("submit", event => {
+if (serverOrdering) pickupDate.addEventListener("change", loadStock);
+form.addEventListener("submit", async event => {
   event.preventDefault();
   refreshPickupDates();
   const {size, selected, count, total} = boxState();
   if (!pickupDate.value || count !== size || !form.checkValidity()) {
     render();
     form.reportValidity();
+    return;
+  }
+  if (serverOrdering) {
+    if (pending || save.disabled) return;
+    const payload = {
+      pickup: pickupDate.value, name: orderName.value.trim(), email: orderEmail.value.trim(),
+      gift: gift.checked, quantities: Object.fromEntries(flavors.map(([, , key], index) => [key, selected[index]]))
+    };
+    const fingerprint = JSON.stringify(payload);
+    if (lastRequest?.fingerprint !== fingerprint) {
+      lastRequest = {fingerprint, id: crypto.randomUUID().replaceAll("-", "")};
+    }
+    pending = true;
+    orderStatus.textContent = "Sending your preorder…";
+    render();
+    try {
+      const response = await fetch("api/orders", {
+        method: "POST", headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({...payload, id: lastRequest.id})
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        if (response.status === 409) await loadStock();
+        throw Error(result.error);
+      }
+      quantities.forEach(input => { input.value = "0"; });
+      lastRequest = null;
+      await loadStock();
+      orderStatus.textContent = `Preorder received. Reference: ${result.id}. Total: ${money(result.totalCents)}.`;
+    } catch (error) {
+      orderStatus.textContent = error.message || "Could not submit your preorder. Please try again.";
+    } finally {
+      pending = false;
+      render();
+    }
     return;
   }
   const lines = [
