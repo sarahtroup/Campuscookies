@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Campus Cookies | Build a Cookie Box</title>
 <style>
-:root { color-scheme: light; --ink:#083b91; --sky:#a2dfeb; --gold:#ffcc68; --paper:#fffdf5; --line:#a9bedb; font-family:system-ui,sans-serif; color:var(--ink); background:var(--paper); }
+:root { color-scheme: light; --ink:#0046ae; --sky:#b8f0ff; --gold:#ffcf83; --paper:#fffdf5; --line:#a9bedb; font-family:system-ui,sans-serif; color:var(--ink); background:var(--paper); }
 * { box-sizing:border-box; }
 body { margin:0; }
 .wrap { width:min(100% - 2.5rem, 70rem); margin-inline:auto; }
@@ -38,21 +38,50 @@ input { accent-color:var(--ink); }
 .total { font-size:1.4rem; }
 .mission { background:var(--ink); color:white; }
 @media(max-width:42rem) { form { grid-template-columns:1fr; gap:.75rem; } }
+.site-logo { display:block; width:clamp(8rem, 19vw, 12rem); height:auto; }
+.hero { overflow:hidden; }
+.hero-inner { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); align-items:center; gap:2rem; }
+.hero-art { display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); grid-template-rows:repeat(10,minmax(0,1fr)); aspect-ratio:1.12; isolation:isolate; }
+.hero-art img { width:100%; height:100%; object-fit:contain; mix-blend-mode:multiply; }
+.hero-art img:first-child { grid-area:1 / 1 / 9 / 10; z-index:2; transform:rotate(-12deg); }
+.hero-art img:nth-child(2) { grid-area:2 / 7 / 8 / 13; transform:rotate(14deg); }
+.hero-art img:nth-child(3) { grid-area:6 / 6 / 11 / 12; transform:rotate(10deg); z-index:3; }
+.flavor-image { width:4.7rem; height:4.7rem; object-fit:contain; flex:none; mix-blend-mode:multiply; }
+.flavor-copy { flex:1; }
+.pickup { margin:1rem 0; line-height:1.6; }
+.story { display:grid; grid-template-columns:1fr 1fr; gap:clamp(1.5rem,5vw,4rem); align-items:center; }
+.story img, .gift-photo { display:block; width:100%; border-radius:.65rem; object-fit:cover; }
+.story img { aspect-ratio:4/3; }
+.gift-photo { aspect-ratio: 2/1; }
+.footer-logo { display:block; margin-top:1.5rem; width:11rem; max-width:100%; height:auto; }
+@media(max-width:42rem) {
+  .hero-inner, .story { grid-template-columns:1fr; }
+  .hero-art { max-width:26rem; width:100%; margin-inline:auto; }
+  .hero { padding-block:2rem; }
+  .hero-inner { gap:.8rem; }
+}
 </style>
 </head>
 <body>
-<header><nav class="wrap" aria-label="Main"><strong>Campus Cookies</strong><a href="#order">Build a box</a></nav></header>
+<header><nav class="wrap" aria-label="Main"><img class="site-logo" src="assets/campus-cookies.png" width="500" height="297" alt="Campus Cookies"><a href="#order">Build a box</a></nav></header>
 <main>
 <section class="hero" aria-labelledby="hero-title">
-<div class="wrap">
+<div class="wrap hero-inner">
+<div>
 <h1 id="hero-title">Major flavor. Major impact.</h1>
-<p>Five gourmet flavors, $3.50 per cookie. Every cookie comes individually wrapped.</p>
+<p>Brown butter, premium chocolate, crisp edges, soft centers, and a slightly obsessive commitment to getting every batch right.</p>
 <a class="button" href="#order">Build a cookie box</a>
+</div>
+<div class="hero-art" aria-hidden="true">
+<img src="assets/valedictorian.webp" alt="" fetchpriority="high">
+<img src="assets/all-nighter.webp" alt="">
+<img src="assets/party-animal.webp" alt="">
+</div>
 </div>
 </section>
 <section class="wrap order" id="order" aria-labelledby="order-title">
 <h2 id="order-title">Build your box</h2>
-<p>Choose a box size, then fill it with your favorite flavors.</p>
+<p>Choose a box size, then fill it with your favorite flavors. Cookies are $3.50 each and individually wrapped.</p>
 <form id="box">
 <div>
 <fieldset><legend>Box size</legend><div class="sizes" id="sizes"></div></fieldset>
@@ -60,19 +89,31 @@ input { accent-color:var(--ink); }
 </div>
 <div class="summary">
 <h3>Your box</h3>
-<label><input type="checkbox" id="gift"> Add a gift box (+$5.00)</label>
+<img class="gift-photo" src="assets/wrapped.webp" alt="Campus Cookies in individual wrappers" loading="lazy">
+<label><input type="checkbox" id="gift"> Add a gift box with bow (+$5.00)</label>
 <p id="counts" role="status"></p>
 <p class="total">Box total <strong id="total"></strong></p>
-<button class="button" id="save" type="submit" disabled>Download box summary</button>
-<p>Save your selections for reference. Online checkout is coming later.</p>
+<button class="button" id="save" type="submit" disabled>Prepare preorder email</button>
+<p>Your email app opens with your box details. Send the email to request your preorder.</p>
 </div>
 </form>
+<div class="pickup">
+<h3>Preorder Monday. Pick up Friday.</h3>
+<p>Order by Monday at 2 p.m. Pick up Friday from 9:30 a.m. to 3 p.m. at a location of The Arc Jacksonville.</p>
+<p><a href="tel:+19043550155">904-355-0155</a> · <a href="mailto:campuscookiesjax@arcjacksonville.org">campuscookiesjax@arcjacksonville.org</a></p>
+<p>Planning a larger order? <a href="mailto:campuscookiesjax@arcjacksonville.org?subject=Campus%20Cookies%20catering%20inquiry">Ask about catering and corporate gifts.</a></p>
+</div>
 </section>
 <section class="mission" aria-labelledby="mission-title">
-<div class="wrap">
+<div class="wrap story">
+<div>
 <h2 id="mission-title">Baked with Purpose</h2>
 <p>Our gourmet cookies are baked with purpose, creating job training and employment opportunities for people with intellectual and developmental differences.</p>
+<p>Campus Cookies began with a group of Career Campus students with intellectual and developmental differences who turned a college entrepreneurship class into a real-world business idea. Today, each batch creates opportunities to build culinary and baking skills through hands-on study, internships, and paid employment.</p>
 <strong>Powered by The Arc Jacksonville</strong>
+<img class="footer-logo" src="assets/campus-cookies-reverse.png" alt="" loading="lazy">
+</div>
+<img src="assets/baking.webp" alt="Campus Cookies arranged on a baking tray" loading="lazy">
 </div>
 </section>
 </main>
@@ -81,11 +122,11 @@ const sizes = [6, 13, 24, 36, 48];
 const pricePerCookie = 350;
 const giftPrice = 500;
 const flavors = [
-  ["Valedictorian", "Brown butter, chocolate chips and a touch of salt."],
-  ["All-Nighter", "Dark chocolate, espresso with a touch of sea salt."],
-  ["Party Animal", "Brown butter cookie dressed up with sprinkles."],
-  ["Overachiever", "Brown butter, chocolate, caramel, and sea salt."],
-  ["Nutty Professor", "Rich chocolate meets peanut butter."]
+  ["Valedictorian", "Rich brown butter, premium semi-sweet chocolate chips, decadent dark chocolate chunks, and a touch of salt.", "valedictorian"],
+  ["All-Nighter", "Deep, dark chocolate meets espresso with a touch of salt.", "all-nighter"],
+  ["Party Animal", "Our signature brown butter cookie dressed up with rainbow sprinkles.", "party-animal"],
+  ["Overachiever", "Rich brown butter dough loaded with chocolate, white chocolate, caramel, and sea salt.", "overachiever"],
+  ["Nutty Professor", "Chocolate meets peanut butter in one seriously smart combination.", "nutty-professor"]
 ];
 const money = cents => new Intl.NumberFormat("en-US", {style:"currency", currency:"USD"}).format(cents / 100);
 const form = document.querySelector("#box");
@@ -93,8 +134,8 @@ const gift = document.querySelector("#gift");
 document.querySelector("#sizes").innerHTML = sizes.map(size =>
   `<label class="size"><input type="radio" name="size" value="${size}" ${size === 6 ? "checked" : ""}><strong>${size} cookies</strong><span>${money(size * pricePerCookie)}</span></label>`
 ).join("");
-document.querySelector("#flavors").innerHTML = flavors.map(([name, description], index) =>
-  `<label class="flavor"><span><strong>${name}</strong><small>${description}</small></span><input class="quantity" name="flavor-${index}" type="number" min="0" max="48" step="1" value="0" inputmode="numeric" aria-label="${name} quantity"></label>`
+document.querySelector("#flavors").innerHTML = flavors.map(([name, description, photo], index) =>
+  `<label class="flavor"><img class="flavor-image" src="assets/${photo}.webp" alt="" loading="lazy"><span class="flavor-copy"><strong>${name}</strong><small>${description}</small></span><input class="quantity" name="flavor-${index}" type="number" min="0" max="48" step="1" value="0" inputmode="numeric" aria-label="${name} quantity"></label>`
 ).join("");
 const quantities = [...form.querySelectorAll(".quantity")];
 function boxState() {
@@ -119,18 +160,20 @@ form.addEventListener("submit", event => {
   const {size, selected, count, total} = boxState();
   if (count !== size || !form.checkValidity()) return;
   const lines = [
-    "Campus Cookies",
+    "Hello Campus Cookies, I’d like to request a preorder.",
+    "",
     `Box of ${size} individually wrapped cookies`,
     ...flavors.flatMap(([name], index) => selected[index] ? [`${selected[index]} × ${name}`] : []),
     `Gift box: ${gift.checked ? money(giftPrice) : "No"}`,
-    `Box total: ${money(total)}`
+    `Box total: ${money(total)}`,
+    "",
+    "Name:",
+    "Phone:",
+    "Preferred Friday pickup date and location:"
   ];
-  const url = URL.createObjectURL(new Blob([lines.join("\n")], {type:"text/plain"}));
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = "campus-cookies-box.txt";
-  link.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  const subject = encodeURIComponent("Campus Cookies preorder");
+  const body = encodeURIComponent(lines.join("\n"));
+  window.location.href = `mailto:campuscookiesjax@arcjacksonville.org?subject=${subject}&body=${body}`;
 });
 render();
 </script>
