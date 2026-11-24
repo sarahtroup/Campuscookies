@@ -5,90 +5,100 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Campus Cookies | Build a Cookie Box</title>
 <style>
-:root { color-scheme: light; --ink:#0046ae; --sky:#b8f0ff; --gold:#ffcf83; --paper:#fffdf5; --line:#a9bedb; font-family:system-ui,sans-serif; color:var(--ink); background:var(--paper); }
+:root {
+  color-scheme: light;
+  --ink:#12305b; --blue:#0046ae; --sky:#b8f0ff; --gold:#ffcf83;
+  --paper:#fffdf7; --cream:#f6f0e4; --line:#d7dbe0;
+  --display:Georgia,serif;
+  font-family:system-ui,sans-serif; color:var(--ink); background:var(--paper);
+}
 * { box-sizing:border-box; }
-body { margin:0; }
-.wrap { width:min(100% - 2.5rem, 70rem); margin-inline:auto; }
-header { background:var(--sky); padding:1.2rem 0; border-bottom:1px solid var(--ink); }
-nav { display:flex; justify-content:space-between; align-items:center; gap:1rem; }
+body,h1,h2,h3,p,figure { margin:0; }
+img { display:block; max-width:100%; }
 a { color:inherit; font-weight:750; }
-.hero { background:var(--sky); padding:clamp(3rem, 9vw, 7rem) 0; }
-h1,h2,h3,p { margin:0; }
-h1,h2 { font-family:Georgia,serif; line-height:1; }
-h1 { font-size:clamp(3rem, 9vw, 7rem); letter-spacing:-.055em; max-width:11ch; }
-h2 { font-size:clamp(2.2rem, 5vw, 3.6rem); letter-spacing:-.035em; }
-.hero p, .mission p { margin-block:1.25rem; max-width:45ch; font-size:1.15rem; line-height:1.55; }
-.button { display:inline-block; border:2px solid var(--ink); border-radius:.4rem; background:var(--gold); color:var(--ink); padding:.75rem 1rem; text-decoration:none; font:inherit; font-weight:800; cursor:pointer; }
+:focus-visible { outline:3px solid #0057cc; outline-offset:4px; }
+.wrap { width:min(calc(100% - 3rem),74rem); margin-inline:auto; }
+header { border-bottom:1px solid var(--line); }
+nav { display:flex; align-items:center; gap:clamp(1rem,3vw,2.25rem); min-height:5rem; }
+nav a { text-decoration:none; }
+nav a:hover { text-decoration:underline; }
+nav a:last-child { color:var(--blue); }
+.site-logo { width:clamp(5rem,11vw,7rem); height:auto; margin-right:auto; }
+h1,h2,h3 { font-family:var(--display); letter-spacing:-.04em; }
+h2 { font-size:clamp(2.4rem,5vw,4.5rem); line-height:1; }
+.button { display:inline-flex; justify-content:center; align-items:center; min-height:3rem; padding:.65rem 1.2rem; border:1px solid transparent; border-radius:99rem; background:var(--blue); color:white; text-decoration:none; font:inherit; font-weight:800; cursor:pointer; }
+.button:hover { background:#003681; }
 .button:disabled { opacity:.55; cursor:default; }
-section.order, .mission { padding-block:clamp(2.5rem, 7vw, 5rem); }
-.order > p { margin-top:1rem; }
-form { display:grid; grid-template-columns:minmax(0, 1.6fr) minmax(15rem, 1fr); gap:2rem; margin-top:2rem; align-items:start; }
-fieldset { margin:0 0 1.4rem; padding:0; border:0; min-width:0; }
-legend { font-weight:800; margin-bottom:.8rem; }
-.sizes { display:grid; grid-template-columns:repeat(auto-fit,minmax(5.7rem,1fr)); gap:.5rem; }
+.hero { background:var(--sky); overflow:hidden; }
+.hero-inner { display:grid; grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr); align-items:center; gap:clamp(1.5rem,4vw,4rem); }
+.hero-text { padding-block:clamp(2.1rem,6vw,6rem); }
+.eyebrow { margin-bottom:.9rem; color:var(--blue); font-size:.87rem; font-weight:850; letter-spacing:.105em; text-transform:uppercase; }
+.hero h1 { max-width:11ch; font-size:clamp(3.2rem,6.3vw,6.5rem); line-height:.91; letter-spacing:-.065em; }
+.hero h1 span { display:block; }
+.hero-copy { max-width:37ch; margin:1.25rem 0 1.5rem; font-size:clamp(1rem,1.5vw,1.18rem); line-height:1.55; }
+.hero-art { position:relative; display:grid; isolation:isolate; min-width:0; aspect-ratio:1.08; align-self:end; align-items:end; }
+.hero-art::before { content:""; position:absolute; z-index:-1; width:86%; aspect-ratio:1; left:7%; bottom:-15%; border-radius:50%; background:var(--gold); }
+.hero-art img { width:100%; height:100%; max-height:38rem; object-fit:contain; object-position:center bottom; }
+.drop-info { border-bottom:1px solid var(--line); }
+.drop-info .wrap { display:flex; justify-content:space-between; flex-wrap:wrap; gap:.55rem 1rem; padding-block:1rem; font-size:.91rem; font-weight:750; }
+.lineup,.order,.mission { padding-block:clamp(3rem,7vw,6.5rem); }
+.lineup .section-heading { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:end; gap:.8rem 1.5rem; padding-bottom:1.25rem; border-bottom:1px solid var(--line); }
+.section-heading a { color:var(--blue); text-underline-offset:.22em; }
+.cookie-cards { display:grid; grid-template-columns:1.15fr 1fr 1fr; grid-template-rows:1fr 1fr; gap:1rem; list-style:none; padding:0; margin:1.25rem 0 0; }
+.cookie-card { min-width:0; display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr); align-items:center; gap:.75rem; padding:clamp(.7rem,1.6vw,1.35rem); background:var(--cream); border-radius:.65rem; }
+.cookie-card img { width:100%; height:auto; aspect-ratio:1; object-fit:contain; mix-blend-mode:multiply; }
+.cookie-card h3 { font-size:clamp(1.2rem,2vw,1.7rem); line-height:1; }
+.cookie-card p { margin-top:.4rem; font-size:.94rem; line-height:1.4; }
+.cookie-card--feature { grid-row:span 2; grid-template-columns:1fr; grid-template-rows:1fr auto; text-align:center; background:#ffedc7; padding:clamp(1rem,2.5vw,2.1rem); }
+.cookie-card--feature img { max-width:18rem; margin-inline:auto; }
+.cookie-card--feature h3 { font-size:clamp(1.65rem,3.4vw,2.8rem); }
+.order { border-top:1px solid var(--line); }
+.order > p { margin-top:1rem; line-height:1.5; }
+form { display:grid; grid-template-columns:minmax(0,1.65fr) minmax(0,1fr); gap:clamp(1.5rem,4vw,4rem); margin-top:2rem; align-items:start; }
+fieldset { margin:0 0 1.5rem; padding:0; border:0; min-width:0; }
+legend,.pickup-field label { display:block; font-weight:850; margin-bottom:.7rem; }
+.pickup-field select { width:100%; max-width:28rem; padding:.75rem; color:inherit; background:white; border:1px solid #8995a8; border-radius:.4rem; font:inherit; }
+.pickup-field p,.pickup p { margin-top:.55rem; line-height:1.5; }
+.pickup { margin-top:1.75rem; overflow-wrap:anywhere; }
+.sizes { display:grid; grid-template-columns:repeat(auto-fit,minmax(5.7rem,1fr)); gap:.55rem; }
 .size { display:flex; flex-direction:column; align-items:center; gap:.3rem; padding:.65rem .25rem; border:1px solid var(--line); border-radius:.4rem; cursor:pointer; text-align:center; }
-.size:has(:checked) { border-color:var(--ink); background:var(--sky); }
-input { accent-color:var(--ink); }
-.flavor { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.8rem 0; border-bottom:1px solid var(--line); }
-.flavor small { display:block; font-size:.9rem; margin-top:.2rem; }
-.flavor input { width:4.4rem; padding:.45rem; font:inherit; color:inherit; border:1px solid var(--line); border-radius:.3rem; }
-.summary { background:#e2f6fa; padding:1.4rem; border-radius:.65rem; display:grid; gap:1rem; }
+.size:has(:checked) { border-color:var(--blue); background:#e9f8ff; }
+input { accent-color:var(--blue); }
+.flavor { display:flex; align-items:center; justify-content:space-between; gap:.85rem; padding:.85rem 0; border-bottom:1px solid var(--line); }
+.flavor-image { width:clamp(3rem,6vw,4.7rem); height:auto; flex:none; mix-blend-mode:multiply; }
+.flavor-copy { flex:1; min-width:0; }
+.flavor small { display:block; font-size:.9rem; margin-top:.25rem; line-height:1.4; }
+.flavor-stock { font-weight:750; }
+.flavor-stock[hidden] { display:none; }
+.flavor input { width:3.8rem; padding:.45rem; font:inherit; color:inherit; border:1px solid #8995a8; border-radius:.3rem; }
+.summary { background:#e9f8ff; padding:clamp(1.1rem,2.6vw,2rem); border-radius:.7rem; display:grid; gap:1rem; }
+.summary h3 { font-size:1.75rem; }
 .summary label { display:flex; align-items:center; gap:.45rem; }
 .summary p { line-height:1.4; }
 #contact input { display:block; width:100%; font:inherit; padding:.45rem; margin:.3rem 0 .7rem; }
-.flavor-stock { font-weight:750; }
-.total { font-size:1.4rem; }
+.total { font-size:1.35rem; }
+.gift-photo { width:100%; aspect-ratio:4/3; object-fit:contain; background:#f8ead5; border-radius:.4rem; }
 .mission { background:var(--ink); color:white; }
-@media(max-width:42rem) { form { grid-template-columns:1fr; gap:.75rem; } }
-.site-logo { display:block; width:clamp(8rem, 19vw, 12rem); height:auto; }
-.hero { background:var(--paper); color:#102851; padding-block:clamp(1.75rem,4.2vw,4.2rem); }
-.hero-inner { display:grid; grid-template-columns:minmax(0,.72fr) minmax(0,1.28fr); align-items:center; gap:clamp(1.35rem,4vw,3.8rem); }
-.hero h1 { font:900 clamp(2.75rem,5.5vw,5.3rem)/.96 system-ui,sans-serif; letter-spacing:-.075em; color:var(--ink); max-width:none; }
-.hero h1 span { display:block; }
-.hero .tagline { margin:0 0 .85rem; color:var(--ink); font-size:.92rem; font-weight:800; }
-.hero .hero-copy { max-width:36ch; margin-block:1rem 1.25rem; }
-.hero .button { background:var(--ink); color:white; border-color:var(--ink); border-radius:99rem; padding:.85rem 1.25rem; }
-.hero .button:hover { background:#00368f; border-color:#00368f; }
-.hero-art { min-width:0; margin:0; }
-.hero-art img { display:block; width:100%; height:auto; border-radius:1rem; }
-.drop-info {
-  background:var(--gold); color:#102851; padding:.78rem 0;
-  border-block:.22rem double #102851;
+.story { display:grid; grid-template-columns:1.05fr .95fr; gap:clamp(1.5rem,5vw,4rem); align-items:center; }
+.mission p { margin-block:1.15rem; max-width:49ch; font-size:1.04rem; line-height:1.6; }
+.story > img { width:100%; aspect-ratio:4/3; object-fit:cover; border-radius:.65rem; }
+.footer-logo { margin-top:1.5rem; width:9rem; height:auto; }
+@media (max-width:65rem) {
+  .cookie-cards { grid-template-columns:1.1fr 1fr 1fr; }
+  .cookie-card { grid-template-columns:1fr; text-align:center; }
+  .cookie-card img { max-width:8rem; margin-inline:auto; }
+  .cookie-card--feature img { max-width:15rem; }
 }
-.drop-info .wrap { display:flex; justify-content:center; flex-wrap:wrap; gap:.25rem .75rem; font-weight:820; text-align:center; }
-.drop-info span + span::before { content:"•"; margin-right:.75rem; }
-.lineup { background:var(--sky); padding-block:clamp(2.5rem,6vw,5rem); }
-.lineup h2 { font:950 clamp(2.35rem,5.5vw,4.6rem)/.93 system-ui,sans-serif; letter-spacing:-.07em; }
-.cookie-cards { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:.7rem; margin:1.4rem 0 0; padding:0; list-style:none; }
-.cookie-card { background:#fff2ce; color:#172d50; min-width:0; border:1px solid #244e8c; border-radius:1rem; padding:.9rem .7rem 1rem; text-align:center; }
-.cookie-card:nth-child(2n) { background:#e6dcff; }
-.cookie-card:nth-child(3) { background:#ffd4c9; }
-.cookie-card:nth-child(4) { background:#ffcf83; }
-.cookie-card:nth-child(5) { background:#d6f2cc; }
-.cookie-card img { display:block; width:100%; aspect-ratio:1; object-fit:contain; mix-blend-mode:multiply; margin:auto; max-width:11rem; }
-.cookie-card h3 { font-size:clamp(.94rem,1.5vw,1.2rem); line-height:1.1; margin-top:.35rem; overflow-wrap:anywhere; }
-.cookie-card p { margin-top:.32rem; font-size:.93rem; line-height:1.3; }
-@media(max-width:50rem) { .cookie-cards { grid-template-columns:repeat(3,minmax(0,1fr)); } }
-@media(max-width:32rem) { .cookie-cards { grid-template-columns:repeat(2,minmax(0,1fr)); } }
-.pickup-field label { display:block; font-weight:800; margin-bottom:.5rem; }
-.pickup-field select { width:100%; max-width:28rem; padding:.72rem .6rem; color:inherit; background:white; border:1px solid var(--ink); border-radius:.4rem; font:inherit; }
-.pickup-field p { margin-top:.45rem; line-height:1.45; }
-.flavor-image { width:4.7rem; height:4.7rem; object-fit:contain; flex:none; mix-blend-mode:multiply; }
-.flavor-copy { flex:1; }
-.pickup { margin:1rem 0; line-height:1.6; }
-.story { display:grid; grid-template-columns:1fr 1fr; gap:clamp(1.5rem,5vw,4rem); align-items:center; }
-.story img, .gift-photo { display:block; width:100%; border-radius:.65rem; object-fit:cover; }
-.story img { aspect-ratio:4/3; }
-.gift-photo { aspect-ratio: 4/3; object-fit:contain; background:#f8ead5; }
-.footer-logo { display:block; margin-top:1.5rem; width:11rem; max-width:100%; height:auto; }
-@media(max-width:42rem) {
-  .hero-inner, .story { grid-template-columns:1fr; }
-  .hero-art { max-width:26rem; width:100%; margin-inline:auto; }
-  .hero { padding-block:2rem; }
-  .hero-inner { gap:1.8rem; }
-  .hero h1 { font-size:clamp(2.45rem,9.5vw,4.1rem); }
-  nav { gap:.65rem; }
-  .site-logo { width:clamp(6.2rem,27vw,8rem); }
+@media (max-width:45rem) {
+  .wrap { width:min(calc(100% - 2rem),74rem); }
+  .hero-inner,.story,form { grid-template-columns:1fr; }
+  .hero-inner { gap:0; }
+  .hero-text { padding-block:2.15rem 1rem; }
+  .hero h1 { font-size:clamp(2.85rem,10vw,4.6rem); }
+  .hero-art { width:min(100%,28rem); margin-inline:auto; aspect-ratio:1.2; }
+  .drop-info .wrap { justify-content:flex-start; }
+  .cookie-cards { grid-template-columns:1fr 1fr; grid-template-rows:auto; gap:.65rem; }
+  .cookie-card--feature { grid-column:1 / -1; grid-row:auto; grid-template-columns:1fr 1fr; grid-template-rows:auto; text-align:left; }
 }
 </style>
 </head>
@@ -97,27 +107,27 @@ input { accent-color:var(--ink); }
 <main>
 <section class="hero" aria-labelledby="hero-title">
 <div class="wrap hero-inner">
-<div>
-<p class="tagline">The Friday Cookie Drop</p>
+<div class="hero-text">
+<p class="eyebrow">The Friday Cookie Drop</p>
 <h1 id="hero-title">Major flavor. <span>Major impact.</span></h1>
 <p class="hero-copy">Brown butter, premium chocolate, crisp edges, and soft centers. Build a box of your favorites for Friday pickup.</p>
 <a class="button" href="#pickup-date">Pick your Friday</a>
 </div>
 <figure class="hero-art">
-<img src="assets/friday-cookie-tray.webp" alt="A Campus Cookies baker smiles as she holds a tray of freshly baked cookies" width="1200" height="1000" fetchpriority="high">
+<img src="assets/baker-cutout.webp" alt="A Campus Cookies baker smiles as she holds a tray of freshly baked cookies" width="1050" height="941" fetchpriority="high">
 </figure>
 </div>
 </section>
 <div class="drop-info"><p class="wrap"><span>$3.50 per cookie</span><span>Individually wrapped</span><span>Preorder by Monday at 2 p.m. ET</span></p></div>
 <section class="lineup" id="lineup" aria-labelledby="lineup-title">
 <div class="wrap">
-<h2 id="lineup-title">Meet the lineup</h2>
+<div class="section-heading"><h2 id="lineup-title">The cookie lineup</h2><a href="#order">Build your box</a></div>
 <ul class="cookie-cards">
-<li class="cookie-card"><img src="assets/valedictorian.webp" alt="" width="660" height="660" loading="lazy"><h3>Valedictorian</h3><p>Brown butter chocolate chip</p></li>
-<li class="cookie-card"><img src="assets/all-nighter.webp" alt="" width="660" height="660" loading="lazy"><h3>All-Nighter</h3><p>Dark chocolate &amp; espresso</p></li>
-<li class="cookie-card"><img src="assets/party-animal.webp" alt="" width="660" height="660" loading="lazy"><h3>Party Animal</h3><p>Rainbow sprinkles</p></li>
-<li class="cookie-card"><img src="assets/overachiever.webp" alt="" width="660" height="660" loading="lazy"><h3>Overachiever</h3><p>Chocolate, caramel &amp; sea salt</p></li>
-<li class="cookie-card"><img src="assets/nutty-professor.webp" alt="" width="660" height="660" loading="lazy"><h3>Nutty Professor</h3><p>Chocolate &amp; peanut butter</p></li>
+<li class="cookie-card cookie-card--feature"><img src="assets/valedictorian.webp" alt="" width="660" height="660" loading="lazy"><div><h3>Valedictorian</h3><p>Brown butter chocolate chip</p></div></li>
+<li class="cookie-card"><img src="assets/all-nighter.webp" alt="" width="660" height="660" loading="lazy"><div><h3>All-Nighter</h3><p>Dark chocolate &amp; espresso</p></div></li>
+<li class="cookie-card"><img src="assets/party-animal.webp" alt="" width="660" height="660" loading="lazy"><div><h3>Party Animal</h3><p>Rainbow sprinkles</p></div></li>
+<li class="cookie-card"><img src="assets/overachiever.webp" alt="" width="660" height="660" loading="lazy"><div><h3>Overachiever</h3><p>Chocolate, caramel &amp; sea salt</p></div></li>
+<li class="cookie-card"><img src="assets/nutty-professor.webp" alt="" width="660" height="660" loading="lazy"><div><h3>Nutty Professor</h3><p>Chocolate &amp; peanut butter</p></div></li>
 </ul>
 </div>
 </section>
