@@ -129,6 +129,14 @@ h2{color:var(--blue);font-size:clamp(1.65rem,4vw,3.55rem);line-height:.98;letter
 .skip{position:absolute;left:1rem;top:1rem;transform:translateY(-200%);z-index:5;background:white;padding:.5rem}
 .skip:focus{transform:none}
 @media(max-width:42rem){.story{grid-template-columns:1fr}}
+.site-footer{background:#edf6ff;border-top:1px solid #d0e0f1;padding:clamp(1.5rem,4vw,3rem) 0}
+.footer-inner{display:flex;align-items:center;justify-content:space-between;gap:1.25rem 2.5rem;flex-wrap:wrap}
+.footer-arc{display:inline-block}
+.footer-arc img{width:clamp(7rem,15vw,9.5rem)}
+.footer-contact h2{font-size:1.15rem;letter-spacing:-.02em;margin-bottom:.5rem}
+.footer-contact ul{display:flex;flex-wrap:wrap;gap:.45rem 1.2rem;padding:0;margin:0;list-style:none}
+.footer-contact a{text-underline-offset:.2em;overflow-wrap:anywhere}
+@media(max-width:42rem){.footer-contact ul{flex-direction:column}}
 </style>
 </head>
 <body>
@@ -197,12 +205,24 @@ h2{color:var(--blue);font-size:clamp(1.65rem,4vw,3.55rem);line-height:.98;letter
 </div>
 <div>
 <p>Preorder by Monday at 2 p.m. and pick up on your selected Friday from 9:30 a.m. to 3 p.m. Eastern.</p>
-<p>Questions? <a href="tel:+19043550155">904-355-0155</a> · <a href="mailto:campuscookiesjax@arcjacksonville.org">campuscookiesjax@arcjacksonville.org</a></p>
 <p>Planning a larger order? <a href="mailto:campuscookiesjax@arcjacksonville.org?subject=Campus%20Cookies%20catering%20inquiry">Ask about catering and corporate gifts.</a></p>
 </div>
 </div>
 </section>
 </main>
+<footer class="site-footer">
+<div class="wrap footer-inner">
+<a class="footer-arc" href="https://arcjacksonville.org/"><img src="assets/the-arc-jacksonville.png" alt="The Arc Jacksonville" width="372" height="252" loading="lazy"></a>
+<section class="footer-contact" aria-labelledby="contact-title">
+<h2 id="contact-title">Contact Campus Cookies</h2>
+<ul>
+<li><a href="tel:+19043550155">904-355-0155</a></li>
+<li><a href="mailto:campuscookiesjax@arcjacksonville.org">campuscookiesjax@arcjacksonville.org</a></li>
+<li><a href="https://www.instagram.com/campuscookiesjax/">Instagram @campuscookiesjax</a></li>
+</ul>
+</section>
+</div>
+</footer>
 <script>
 const cookieCluster = document.querySelector("#hero-cookies");
 const motionButton = document.querySelector("#cookie-motion");
