@@ -22,14 +22,14 @@ header{background:white;border-bottom:1px solid #12305c16}
 nav{min-height:clamp(3.6rem,5vw,4.5rem);display:flex;align-items:center;gap:clamp(.85rem,3vw,2.25rem)}
 nav a{font-size:.94rem;font-weight:800;text-decoration:none}nav a:hover{text-decoration:underline}
 .home{margin-right:auto;color:var(--blue);font-weight:900}.hero-mark{display:block;width:clamp(7.25rem,12vw,10.5rem);aspect-ratio:500/257;overflow:hidden;margin:0 auto .65rem}.hero-logo{width:100%;height:auto}
-.hero{text-align:center;background:linear-gradient(180deg,transparent 48%,#f5faff80 100%),repeating-linear-gradient(90deg,var(--sky) 0 11%,var(--stripe) 11% 22%);overflow:hidden;padding:clamp(.8rem,2vw,1.5rem) 0 0}
+.hero{text-align:center;background:repeating-linear-gradient(90deg,#b3dbfa 0 11%,#d9efff 11% 22%);overflow:hidden;padding:clamp(.8rem,2vw,1.5rem) 0 0}
 h1{font-size:clamp(3.15rem,8.2vw,7rem);line-height:.88;font-weight:950;letter-spacing:-.085em;color:var(--blue)}
 h1 span{display:block;font:700 .62em/.88 Oleo,'Brush Script MT',cursive;letter-spacing:-.03em;color:var(--ink);margin-bottom:.17em;transform:rotate(-4deg)}
 .hero p{margin:clamp(.6rem,1.2vw,.95rem) auto .65rem;max-width:34ch;line-height:1.55;font-size:clamp(1rem,1.45vw,1.15rem)}
 .cta{display:inline-flex;align-items:center;justify-content:center;min-height:3.05rem;padding:.65rem 1.25rem;background:var(--blue);color:white;border-radius:99rem;text-decoration:none;font-weight:850}
 .cta:hover{background:#00357f}
 .cluster{position:relative;width:min(100%,84rem);margin:0 auto;height:clamp(10.5rem,25.7vw,22rem)}
-.cookie{position:absolute;left:var(--x);top:var(--y);width:var(--w);aspect-ratio:1;mix-blend-mode:multiply;clip-path:circle(43%);transform:rotate(var(--angle));object-fit:contain;z-index:var(--z,1)}
+.cookie{position:absolute;left:var(--x);top:var(--y);width:var(--w);aspect-ratio:1;clip-path:circle(43%);transform:rotate(var(--angle));object-fit:contain;z-index:var(--z,1)}
 .cookie:nth-child(1){--x:1%;--y:14%;--w:22%;--angle:-14deg;--phase:0ms}
 .cookie:nth-child(2){--x:20%;--y:1%;--w:22%;--angle:12deg;--z:2;--phase:-750ms}
 .cookie:nth-child(3){--x:39%;--y:11%;--w:22%;--angle:-8deg;--z:4;--phase:-1500ms}
@@ -118,13 +118,17 @@ h2{color:var(--blue);font-size:clamp(1.65rem,4vw,3.55rem);line-height:.98;letter
 #contact{padding:1rem 0}
 #contact label{font-weight:800}
 #contact input{display:block;padding:.6rem;border:1px solid #9ab0cc;border-radius:.65rem;margin:.3rem 0 .75rem;color:inherit;font:inherit;width:min(100%,22rem)}
-.mission{background:#073573;color:white;padding:clamp(2rem,6vw,5rem) 0}
-.mission h2{color:#b8f0ff}
+.mission{background:#eff8ff;color:#15315c}
+.mission-band{background:#ffe0a7;padding:clamp(.95rem,2.2vw,1.7rem) 0}
+.mission-band h2{font-size:clamp(1.9rem,4.1vw,3.65rem)}
+.mission .story{padding-block:clamp(1.5rem,4vw,3.5rem)}
+.mission h2{color:#0046ae}
 .story .mission-lead{font-size:clamp(1.1rem,2.1vw,1.45rem);font-weight:780;line-height:1.38}
-.story .mission-credit{color:#b8f0ff}
+.story .mission-credit{color:#0046ae}
 .story{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:clamp(1.5rem,6vw,4rem)}
 .story p{line-height:1.6;margin:1rem 0;max-width:48ch}
-.story>img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:1rem}
+.story p:not(.mission-lead){font-size:.94rem;color:#385471}
+.story>img{width:100%;aspect-ratio:4/3;object-fit:cover;border:6px solid #ffe0a7;border-radius:1.25rem}
 .footer-logo{display:none}
 .skip{position:absolute;left:1rem;top:1rem;transform:translateY(-200%);z-index:5;background:white;padding:.5rem}
 .skip:focus{transform:none}
@@ -137,6 +141,11 @@ h2{color:var(--blue);font-size:clamp(1.65rem,4vw,3.55rem);line-height:.98;letter
 .footer-contact ul{display:flex;flex-wrap:wrap;gap:.45rem 1.2rem;padding:0;margin:0;list-style:none}
 .footer-contact a{text-underline-offset:.2em;overflow-wrap:anywhere}
 @media(max-width:42rem){.footer-contact ul{flex-direction:column}}
+.hero .hero-mark{width:clamp(11rem,21vw,18rem);margin-bottom:1.15rem}
+.hero h1{font-size:clamp(2.35rem,4.65vw,4.2rem);letter-spacing:-.065em}
+@media(max-width:42rem){
+ .hero .hero-mark{width:clamp(11rem,55vw,14rem)}
+}
 </style>
 </head>
 <body>
@@ -185,9 +194,9 @@ h2{color:var(--blue);font-size:clamp(1.65rem,4vw,3.55rem);line-height:.98;letter
 </div>
 </section>
 <section class="mission" id="story" aria-labelledby="mission-title">
+<div class="mission-band"><div class="wrap"><h2 id="mission-title">Baked with Purpose</h2></div></div>
 <div class="wrap story">
 <div>
-<h2 id="mission-title">Baked with Purpose</h2>
 <p class="mission-lead">Every batch creates job training and employment opportunities for people with intellectual and developmental differences.</p>
 <p>Campus Cookies began with a group of Career Campus students with intellectual and developmental differences who turned a college entrepreneurship class into a real-world business idea. Today, each batch creates opportunities to build culinary and baking skills through hands-on study, internships, and paid employment.</p>
 <strong class="mission-credit">Powered by The Arc Jacksonville</strong>
