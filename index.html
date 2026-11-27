@@ -358,8 +358,9 @@ const money = cents => new Intl.NumberFormat("en-US", {style:"currency", currenc
 const form = document.querySelector("#box");
 const gift = document.querySelector("#gift");
 const pickupDate = document.querySelector("#pickup-date");
-const squareCheckout = Boolean(document.querySelector('meta[name="campus-square-checkout"]'));
-const serverOrdering = Boolean(document.querySelector('meta[name="campus-inventory"]'));
+const checkoutEndpoint = document.querySelector('meta[name="campus-square-checkout"]')?.content;
+const squareCheckout = Boolean(checkoutEndpoint);
+const serverOrdering = squareCheckout || Boolean(document.querySelector('meta[name="campus-inventory"]'));
 const orderName = document.querySelector("#order-name");
 const orderEmail = document.querySelector("#order-email");
 const orderStatus = document.querySelector("#order-status");
@@ -551,7 +552,7 @@ form.addEventListener("submit", async event => {
     orderStatus.textContent = squareCheckout ? "Opening Square checkout…" : "Sending your preorder…";
     render();
     try {
-      const response = await fetch("api/orders", {
+      const response = await fetch(checkoutEndpoint || "api/orders", {
         method: "POST", headers: {"Content-Type": "application/json"},
         body: JSON.stringify({...payload, id: lastRequest.id})
       });
