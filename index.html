@@ -206,7 +206,7 @@ h2{color:var(--blue);font-size:clamp(1.65rem,4vw,3.55rem);line-height:.98;letter
 <p id="counts" role="status"></p>
 <label class="gift-option"><span class="gift-preview" aria-hidden="true"><img src="assets/gift-box.webp" alt="" width="488" height="650" loading="lazy"></span><span><input type="checkbox" id="gift"> Add a gift box (+$5)</span></label>
 <p><strong id="total"></strong> total</p>
-<button class="cta" id="save" type="submit" disabled>Prepare preorder email</button>
+<button class="cta" id="save" type="submit" disabled>Order</button>
 </div>
 <p id="order-status" class="order-help" role="status" hidden></p>
 <p class="order-help" id="order-help" hidden></p>
@@ -338,7 +338,6 @@ if (serverOrdering) {
   orderStatus.hidden = false;
   orderName.disabled = orderEmail.disabled = false;
   orderName.required = orderEmail.required = true;
-  save.textContent = "Request preorder";
   const orderHelp = document.querySelector("#order-help");
   orderHelp.textContent = "Your request reserves cookies for this Friday. The bakery will follow up by email.";
   orderHelp.hidden = false;
