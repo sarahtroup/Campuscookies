@@ -67,9 +67,10 @@ def pickup_day(value):
     return day
 
 
-def require_open(value, now=None):
+def require_open(value, now=None, square=False):
     day = pickup_day(value)
-    cutoff = datetime.combine(day - timedelta(days=4), datetime.min.time(), EASTERN).replace(hour=14)
+    advance_days, hour, minute = (7, 9, 30) if square else (4, 14, 0)
+    cutoff = datetime.combine(day - timedelta(days=advance_days), datetime.min.time(), EASTERN).replace(hour=hour, minute=minute)
     if (now or datetime.now(EASTERN)) >= cutoff:
         raise ValueError("The preorder deadline has passed for this Friday.")
 
@@ -120,10 +121,11 @@ def reserve(db, payload, now=None, checkout=False):
             return {"id": order_id, "totalCents": previous["total_cents"]}
         if count not in BOX_SIZES:
             raise ValueError("Fill a box of 6, 12, 24, 36, or 48 cookies.")
-        require_open(pickup, now)
-        stock = availability(db, pickup)
-        if any(qty > stock[flavor] for flavor, qty in quantities.items()):
-            raise SoldOut("Some flavors have sold out or have fewer cookies available. Review your box.")
+        require_open(pickup, now, square=checkout)
+        if not checkout:
+            stock = availability(db, pickup)
+            if any(qty > stock[flavor] for flavor, qty in quantities.items()):
+                raise SoldOut("Some flavors have sold out or have fewer cookies available. Review your box.")
         db.execute("INSERT INTO orders VALUES (?, ?, ?, ?, ?, ?)", (order_id, pickup, name.strip(), email, gift, total))
         if checkout:
             db.execute("INSERT INTO checkouts (order_id, expires) VALUES (?, ?)", (order_id, int(time.time()) + 1800))
@@ -250,7 +252,7 @@ class Handler(BaseHTTPRequestHandler):
             if self.server.square:
                 html = html.replace("<title>", '<meta name="campus-square-checkout" content="enabled"><title>', 1)
             self.respond(200, html.encode(), "text/html; charset=utf-8")
-        elif url.path == "/api/availability":
+        elif url.path == "/api/availability" and not self.server.square:
             pickup = parse_qs(url.query).get("pickup", [""])[0]
             try:
                 require_open(pickup)
