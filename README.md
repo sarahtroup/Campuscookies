@@ -26,28 +26,27 @@ python inventory.py --db /path/to/private/cookies.sqlite cancel ORDER_ID
 The database contains customer contact information. Keep the file and backups
 private. Cancelling an order releases its inventory for the pickup date.
 
-## Square checkout
+## Square checkout on GitHub Pages
 
-Run the storefront on a single HTTPS-backed Python host with a persistent private
-SQLite database. Configure `SQUARE_ACCESS_TOKEN` and `SQUARE_LOCATION_ID` in the
-host's private environment. Keep Sandbox and production credentials and databases
-separate. Use the Campus Cookies pickup location in Square.
+Deploy `square-checkout.mjs` as a Cloudflare Worker module. Add the Square access
+token as a Worker secret named `SQUARE_ACCESS_TOKEN` and configure
+`SQUARE_LOCATION_ID` for the Campus Cookies pickup location. Sandbox is the
+default. Use a separate Worker and its own secrets for production and set
+`SQUARE_ENV=production` on that Worker.
 
-```sh
-python inventory.py --db /path/to/private/cookies.sqlite serve --square sandbox
+In the storefront document head, point to the Worker’s checkout endpoint.
+
+```html
+<meta name="campus-square-checkout" content="https://YOUR-WORKER.workers.dev/checkout">
 ```
 
-The existing box builder sends customers to Square-hosted checkout. Square
-receives the flavors, quantities, gift box, pickup date and pickup contact.
-Paid orders can be managed in Square Orders. Square checkout mode accepts orders
-until 9:30 a.m. Eastern on the Friday before pickup, without per-flavor stock
-limits. Customers have 30 minutes to complete checkout. Run the service
-continuously so abandoned checkout links can be canceled.
-
-Before deploying with `--square production`, validate a payment in Sandbox and
-verify the pickup details in Square Orders. Confirm the Square location and the
-sales tax treatment for Campus Cookies before accepting live orders. The
-integration charges the order total shown on the existing storefront.
+The Worker accepts calls from the existing GitHub Pages origin, prices the box
+server-side, and checks the 9:30 a.m. Eastern cutoff the Friday before pickup
+before creating a single-use Square payment link. The cutoff applies to link
+creation. A previously issued link can still be opened after the cutoff. This
+checkout path has no cookie inventory quotas and requires no database. Confirm
+the Square location, the total, pickup details in Square Orders, and sales tax
+treatment before switching to production.
 
 ## Update the announcement
 
