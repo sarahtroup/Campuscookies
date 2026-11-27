@@ -4,6 +4,9 @@ import json
 import os
 import re
 import sqlite3
+import time
+from threading import Thread
+from urllib.request import Request, urlopen
 from contextlib import closing
 from datetime import date, datetime, timedelta
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -27,6 +30,11 @@ CREATE TABLE IF NOT EXISTS orders (
   id TEXT PRIMARY KEY, pickup TEXT NOT NULL, name TEXT NOT NULL, email TEXT NOT NULL,
   gift INTEGER NOT NULL, total_cents INTEGER NOT NULL
 );
+CREATE TABLE IF NOT EXISTS checkouts (
+  order_id TEXT PRIMARY KEY REFERENCES orders(id) ON DELETE CASCADE,
+  expires INTEGER, link_id TEXT, square_order_id TEXT, url TEXT,
+  released INTEGER NOT NULL DEFAULT 0
+);
 CREATE TABLE IF NOT EXISTS quantities (
   order_id TEXT NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
   flavor TEXT NOT NULL, quantity INTEGER NOT NULL,
@@ -36,6 +44,10 @@ CREATE TABLE IF NOT EXISTS quantities (
 
 
 class SoldOut(ValueError):
+    pass
+
+
+class CheckoutExpired(ValueError):
     pass
 
 
@@ -66,7 +78,8 @@ def availability(db, pickup):
     limits = dict(db.execute("SELECT flavor, capacity FROM limits WHERE pickup = ?", (pickup,)))
     used = dict(db.execute(
         "SELECT flavor, SUM(quantity) FROM quantities JOIN orders ON orders.id = quantities.order_id "
-        "WHERE pickup = ? GROUP BY flavor", (pickup,)
+        "WHERE pickup = ? AND NOT EXISTS (SELECT 1 FROM checkouts WHERE checkouts.order_id = orders.id AND released = 1) "
+        "GROUP BY flavor", (pickup,)
     ))
     return {
         item: max(0, limits.get(item, capacity) - used.get(item, 0))
@@ -74,7 +87,7 @@ def availability(db, pickup):
     }
 
 
-def reserve(db, payload, now=None):
+def reserve(db, payload, now=None, checkout=False):
     if not isinstance(payload, dict):
         raise ValueError("Invalid order.")
     pickup = payload.get("pickup")
@@ -112,8 +125,107 @@ def reserve(db, payload, now=None):
         if any(qty > stock[flavor] for flavor, qty in quantities.items()):
             raise SoldOut("Some flavors have sold out or have fewer cookies available. Review your box.")
         db.execute("INSERT INTO orders VALUES (?, ?, ?, ?, ?, ?)", (order_id, pickup, name.strip(), email, gift, total))
+        if checkout:
+            db.execute("INSERT INTO checkouts (order_id, expires) VALUES (?, ?)", (order_id, int(time.time()) + 1800))
         db.executemany("INSERT INTO quantities VALUES (?, ?, ?)", ((order_id, flavor, qty) for flavor, qty in quantities.items()))
     return {"id": order_id, "totalCents": total}
+
+
+FLAVOR_NAMES = dict(zip(FLAVORS, (
+    "Valedictorian", "The All-Nighter", "Party Animal", "Overachiever", "Nutty Professor"
+)))
+
+
+class SquareCheckout:
+    def __init__(self, token, location, sandbox):
+        self.token = token
+        self.location = location
+        self.base = "https://connect.squareupsandbox.com" if sandbox else "https://connect.squareup.com"
+
+    def request(self, method, path, payload=None):
+        data = json.dumps(payload).encode() if payload is not None else None
+        request = Request(self.base + "/v2/" + path, data=data, method=method, headers={
+            "Authorization": f"Bearer {self.token}",
+            "Square-Version": "2026-11-18",
+            "Content-Type": "application/json",
+        })
+        with urlopen(request, timeout=8) as response:
+            return json.load(response)
+
+    def link(self, db, order_id):
+        with db:
+            db.execute("BEGIN IMMEDIATE")
+            row = db.execute(
+                "SELECT * FROM orders JOIN checkouts ON orders.id = checkouts.order_id WHERE id = ?", (order_id,)
+            ).fetchone()
+            if not row or row["released"] or (row["expires"] is not None and row["expires"] <= time.time()):
+                raise CheckoutExpired("This checkout expired. Review your box and try again.")
+            if row["link_id"]:
+                return dict(row)
+            pickup = datetime.combine(pickup_day(row["pickup"]), datetime.min.time(), EASTERN).replace(hour=9, minute=30)
+            quantities = dict(db.execute("SELECT flavor, quantity FROM quantities WHERE order_id = ?", (order_id,)))
+            items = [
+                {"name": FLAVOR_NAMES[flavor], "quantity": str(quantities[flavor]),
+                 "base_price_money": {"amount": 350, "currency": "USD"}}
+                for flavor in FLAVORS if quantities[flavor]
+            ]
+            if row["gift"]:
+                items.append({"name": "Gift box", "quantity": "1",
+                              "base_price_money": {"amount": 500, "currency": "USD"}})
+            note = f"Friday {row['pickup']}, 9:30 a.m.–3 p.m. ET, 1050 N. Davis Street, Jacksonville"
+            response = self.request("POST", "online-checkout/payment-links", {
+                "idempotency_key": order_id,
+                "order": {
+                    "location_id": self.location,
+                    "reference_id": order_id,
+                    "line_items": items,
+                    "fulfillments": [{
+                        "type": "PICKUP", "state": "PROPOSED",
+                        "pickup_details": {"schedule_type": "SCHEDULED", "pickup_at": pickup.isoformat(),
+                                           "note": note, "recipient": {
+                                               "display_name": row["name"], "email_address": row["email"],
+                                           }},
+                    }],
+                },
+                "payment_note": note,
+            })
+            link = response["payment_link"]
+            db.execute("UPDATE checkouts SET link_id = ?, square_order_id = ?, url = ? WHERE order_id = ?",
+                       (link["id"], link["order_id"], link["url"], order_id))
+            return {"link_id": link["id"], "square_order_id": link["order_id"], "url": link["url"]}
+
+    def reap(self, database):
+        while True:
+            with closing(connect(database)) as db:
+                expired = db.execute(
+                    "SELECT order_id FROM checkouts WHERE expires <= ? ORDER BY expires", (time.time(),)
+                ).fetchall()
+                for entry in expired:
+                    order_id = entry["order_id"]
+                    try:
+                        with db:
+                            db.execute("BEGIN IMMEDIATE")
+                            link = db.execute("SELECT * FROM checkouts WHERE order_id = ?", (order_id,)).fetchone()
+                            if link is None or link["expires"] is None:
+                                continue
+                            if not link["link_id"]:
+                                # No link was returned to the customer before it expired.
+                                db.execute("UPDATE checkouts SET expires = NULL, released = 1 WHERE order_id = ?", (order_id,))
+                                continue
+                        path = "orders/" + link["square_order_id"]
+                        state = self.request("GET", path)["order"]["state"]
+                        if state == "DRAFT":
+                            self.request("DELETE", "online-checkout/payment-links/" + link["link_id"])
+                            state = self.request("GET", path)["order"]["state"]
+                        with db:
+                            if state == "CANCELED":
+                                db.execute("UPDATE checkouts SET expires = NULL, released = 1 WHERE order_id = ?", (order_id,))
+                            elif state in ("OPEN", "COMPLETED"):
+                                db.execute("UPDATE checkouts SET expires = NULL WHERE order_id = ?", (order_id,))
+                    except (OSError, ValueError, KeyError, sqlite3.Error):
+                        # Keep the inventory reserved until Square confirms the order's state.
+                        continue
+            time.sleep(30)
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -135,6 +247,8 @@ class Handler(BaseHTTPRequestHandler):
             html = (ROOT / "index.html").read_text().replace(
                 '<meta charset="utf-8">', '<meta charset="utf-8"><meta name="campus-inventory" content="enabled">'
             )
+            if self.server.square:
+                html = html.replace("<title>", '<meta name="campus-square-checkout" content="enabled"><title>', 1)
             self.respond(200, html.encode(), "text/html; charset=utf-8")
         elif url.path == "/api/availability":
             pickup = parse_qs(url.query).get("pickup", [""])[0]
@@ -167,11 +281,17 @@ class Handler(BaseHTTPRequestHandler):
                 raise ValueError("Invalid order.")
             payload = json.loads(self.rfile.read(length))
             with closing(connect(self.server.database)) as db:
-                result = reserve(db, payload)
+                result = reserve(db, payload, checkout=bool(self.server.square))
+                if self.server.square:
+                    result["checkoutUrl"] = self.server.square.link(db, result["id"])["url"]
+        except CheckoutExpired as error:
+            self.json(410, {"error": str(error)})
         except SoldOut as error:
             self.json(409, {"error": str(error)})
         except (ValueError, OverflowError) as error:
             self.json(400, {"error": str(error)})
+        except (OSError, KeyError, sqlite3.Error):
+            self.json(503, {"error": "Square checkout is temporarily unavailable. Please try again."})
         else:
             self.json(201, result)
 
@@ -183,6 +303,7 @@ def main():
     serve = commands.add_parser("serve")
     serve.add_argument("--host", default="127.0.0.1")
     serve.add_argument("--port", type=int, default=9000)
+    serve.add_argument("--square", choices=("sandbox", "production"))
     set_limit = commands.add_parser("set-limit")
     set_limit.add_argument("pickup")
     set_limit.add_argument("flavor", choices=PICKUP_LIMITS)
@@ -208,11 +329,21 @@ def main():
                 ))
                 print(json.dumps(record))
         elif args.command == "cancel":
+            if db.execute("SELECT 1 FROM checkouts WHERE order_id = ?", (args.id,)).fetchone():
+                parser.error("This order has an active Square checkout.")
             if not db.execute("DELETE FROM orders WHERE id = ?", (args.id,)).rowcount:
                 parser.error("Order not found.")
     if args.command == "serve":
         server = ThreadingHTTPServer((args.host, args.port), Handler)
         server.database = args.db
+        server.square = None
+        if args.square:
+            token = os.environ.get("SQUARE_ACCESS_TOKEN")
+            location = os.environ.get("SQUARE_LOCATION_ID")
+            if not token or not location:
+                parser.error("Set SQUARE_ACCESS_TOKEN and SQUARE_LOCATION_ID on the server.")
+            server.square = SquareCheckout(token, location, args.square == "sandbox")
+            Thread(target=server.square.reap, args=(args.db,), daemon=True).start()
         server.serve_forever()
 
 
