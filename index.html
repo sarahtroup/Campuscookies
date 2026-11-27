@@ -253,7 +253,7 @@ h2{color:var(--blue);font-size:clamp(1.65rem,4vw,3.55rem);line-height:.98;letter
 <p><a href="https://www.google.com/maps/search/?api=1&amp;query=1050+N.+Davis+Street,+Jacksonville,+FL+32209">Get directions</a></p>
 </div>
 <div>
-<p>Preorder by Monday at 2 p.m. and pick up on your selected Friday from 9:30 a.m. to 3 p.m. Eastern.</p>
+<p id="pickup-deadline">Preorder by Monday at 2 p.m. and pick up on your selected Friday from 9:30 a.m. to 3 p.m. Eastern.</p>
 <p>Planning a larger order? <a href="mailto:campuscookiesjax@arcjacksonville.org?subject=Campus%20Cookies%20catering%20inquiry">Ask about catering and corporate gifts.</a></p>
 </div>
 </div>
@@ -364,7 +364,12 @@ const orderName = document.querySelector("#order-name");
 const orderEmail = document.querySelector("#order-email");
 const orderStatus = document.querySelector("#order-status");
 const save = document.querySelector("#save");
-if (squareCheckout) save.textContent = "Continue to payment";
+if (squareCheckout) {
+  save.textContent = "Continue to payment";
+  document.querySelector("#pickup-deadline").textContent =
+    "Order by 9:30 a.m. Eastern the Friday before pickup. Pick up on your selected Friday from 9:30 a.m. to 3 p.m. Eastern.";
+}
+const trackStock = serverOrdering && !squareCheckout;
 let availabilityDate = "";
 let remaining = null;
 let pending = false;
@@ -375,15 +380,17 @@ if (serverOrdering) {
   orderName.disabled = orderEmail.disabled = false;
   orderName.required = orderEmail.required = true;
   const orderHelp = document.querySelector("#order-help");
-  orderHelp.textContent = "Your request reserves cookies for this Friday. The bakery will follow up by email.";
+  orderHelp.textContent = squareCheckout
+    ? "Choose your pickup date and continue to Square to pay."
+    : "Your request reserves cookies for this Friday. The bakery will follow up by email.";
   orderHelp.hidden = false;
 }
 const pickupStart = "2027-01-08";
-const cutoffDays = 4;
-const cutoffHour = 14;
+const cutoffDays = squareCheckout ? 7 : 4;
+const cutoffMinutes = squareCheckout ? 9 * 60 + 30 : 14 * 60;
 const easternClock = new Intl.DateTimeFormat("en-US", {
   timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit",
-  hour: "2-digit", hourCycle: "h23"
+  hour: "2-digit", minute: "2-digit", hourCycle: "h23"
 });
 const pickupLabel = new Intl.DateTimeFormat("en-US", {
   timeZone: "UTC", weekday: "long", month: "long", day: "numeric", year: "numeric"
@@ -398,7 +405,7 @@ function availableFridays(now = new Date()) {
     const deadline = new Date(day);
     deadline.setUTCDate(deadline.getUTCDate() - cutoffDays);
     const cutoff = deadline.toISOString().slice(0, 10);
-    if (today < cutoff || (today === cutoff && Number(parts.hour) < cutoffHour)) {
+    if (today < cutoff || (today === cutoff && Number(parts.hour) * 60 + Number(parts.minute) < cutoffMinutes)) {
       dates.push({value: day.toISOString().slice(0, 10), label: pickupLabel.format(day)});
     }
     day.setUTCDate(day.getUTCDate() + 7);
@@ -515,12 +522,12 @@ function render() {
       || (stockReady && selected[index] >= remaining[flavors[index][2]]);
   });
   save.disabled = pending || count !== size || !form.checkValidity()
-    || (serverOrdering && (!stockReady || exceedsStock));
+    || (trackStock && (!stockReady || exceedsStock));
 }
 form.addEventListener("input", render);
 window.addEventListener("focus", render);
 setInterval(render, 30_000);
-if (serverOrdering) pickupDate.addEventListener("change", loadStock);
+if (trackStock) pickupDate.addEventListener("change", loadStock);
 form.addEventListener("submit", async event => {
   event.preventDefault();
   refreshPickupDates();
@@ -551,7 +558,7 @@ form.addEventListener("submit", async event => {
       const result = await response.json();
       if (!response.ok) {
         if (response.status === 410) lastRequest = null;
-        if (response.status === 409 || response.status === 410) await loadStock();
+        if (trackStock && response.status === 409) await loadStock();
         throw Error(result.error);
       }
       if (result.checkoutUrl) {
@@ -560,7 +567,7 @@ form.addEventListener("submit", async event => {
       }
       quantities.forEach(input => { input.value = "0"; });
       lastRequest = null;
-      await loadStock();
+      if (trackStock) await loadStock();
       orderStatus.textContent = `Preorder received. Reference: ${result.id}. Total: ${money(result.totalCents)}.`;
     } catch (error) {
       orderStatus.textContent = error.message || "Could not submit your preorder. Please try again.";
