@@ -39,10 +39,10 @@ python inventory.py --db /path/to/private/cookies.sqlite serve --square sandbox
 
 The existing box builder sends customers to Square-hosted checkout. Square
 receives the flavors, quantities, gift box, pickup date and pickup contact.
-Paid orders can be managed in Square Orders. The service reserves 125 of each
-flavor per pickup date and gives customers 30 minutes to complete checkout.
-It verifies cancellation with Square before releasing stock for an expired link.
-Run the inventory service continuously so abandoned checkouts can be cleaned up.
+Paid orders can be managed in Square Orders. Square checkout mode accepts orders
+until 9:30 a.m. Eastern on the Friday before pickup, without per-flavor stock
+limits. Customers have 30 minutes to complete checkout. Run the service
+continuously so abandoned checkout links can be canceled.
 
 Before deploying with `--square production`, validate a payment in Sandbox and
 verify the pickup details in Square Orders. Confirm the Square location and the
