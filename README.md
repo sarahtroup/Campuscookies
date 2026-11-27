@@ -26,6 +26,29 @@ python inventory.py --db /path/to/private/cookies.sqlite cancel ORDER_ID
 The database contains customer contact information. Keep the file and backups
 private. Cancelling an order releases its inventory for the pickup date.
 
+## Square checkout
+
+Run the storefront on a single HTTPS-backed Python host with a persistent private
+SQLite database. Configure `SQUARE_ACCESS_TOKEN` and `SQUARE_LOCATION_ID` in the
+host's private environment. Keep Sandbox and production credentials and databases
+separate. Use the Campus Cookies pickup location in Square.
+
+```sh
+python inventory.py --db /path/to/private/cookies.sqlite serve --square sandbox
+```
+
+The existing box builder sends customers to Square-hosted checkout. Square
+receives the flavors, quantities, gift box, pickup date and pickup contact.
+Paid orders can be managed in Square Orders. The service reserves 125 of each
+flavor per pickup date and gives customers 30 minutes to complete checkout.
+It verifies cancellation with Square before releasing stock for an expired link.
+Run the inventory service continuously so abandoned checkouts can be cleaned up.
+
+Before deploying with `--square production`, validate a payment in Sandbox and
+verify the pickup details in Square Orders. Confirm the Square location and the
+sales tax treatment for Campus Cookies before accepting live orders. The
+integration charges the order total shown on the existing storefront.
+
 ## Update the announcement
 
 In GitHub, open `index.html` and select the pencil icon. Search for
