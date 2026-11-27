@@ -170,12 +170,12 @@ h2{color:var(--blue);font-size:clamp(1.65rem,4vw,3.55rem);line-height:.98;letter
 .announcement{display:flex;align-items:stretch;background:#0046ae;color:#ffe0a7}
 .announcement[hidden]{display:none}
 .announcement-track{flex:1;min-width:0;overflow:hidden}
-.announcement-message{position:relative;width:fit-content;max-width:100%;margin:0 auto;padding:.55rem .75rem;text-align:center;font-size:.9rem;font-weight:800;line-height:1.35}
+.announcement-message{position:relative;width:fit-content;max-width:100%;margin:0 auto;padding:.55rem .75rem;text-align:center;font-size:clamp(1.125rem,2.2vw,1.35rem);font-weight:800;line-height:1.35}
 .announcement-toggle{display:none;border:0;border-left:1px solid #ffffff40;background:transparent;color:inherit;padding:.35rem .8rem;font:inherit;font-size:.78rem;font-weight:750;cursor:pointer}
 .announcement-toggle:focus-visible{outline:2px solid #ffe0a7;outline-offset:-4px}
 @media(prefers-reduced-motion:no-preference){
  .announcement[data-motion] .announcement-toggle{display:block}
- .announcement[data-motion="on"] .announcement-message{animation:announcement-scroll 26s linear infinite}
+ .announcement[data-motion="on"] .announcement-message{width:max-content;max-width:none;white-space:nowrap;animation:announcement-scroll 26s linear infinite}
 }
 @keyframes announcement-scroll{
  0%,18%,100%{left:0;transform:translateX(0)}
@@ -189,7 +189,7 @@ h2{color:var(--blue);font-size:clamp(1.65rem,4vw,3.55rem);line-height:.98;letter
 <header><nav class="wrap" aria-label="Main"><a class="home" href="#">Campus Cookies</a><a href="#order">Order</a><a href="#story">Our Story</a></nav></header>
 <main id="main">
 <aside class="announcement" aria-label="Bakery announcement">
-  <div class="announcement-track"><p class="announcement-message" id="announcement-message">Sold out for the holidays. Friday pickups resume January 8, 2027.</p></div>
+  <div class="announcement-track"><p class="announcement-message" id="announcement-message">Sold out · Back Jan 8</p></div>
   <button class="announcement-toggle" type="button" aria-controls="announcement-message">Pause</button>
 </aside>
 <section class="hero" aria-labelledby="hero-title">
