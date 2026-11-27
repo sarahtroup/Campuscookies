@@ -358,11 +358,13 @@ const money = cents => new Intl.NumberFormat("en-US", {style:"currency", currenc
 const form = document.querySelector("#box");
 const gift = document.querySelector("#gift");
 const pickupDate = document.querySelector("#pickup-date");
+const squareCheckout = Boolean(document.querySelector('meta[name="campus-square-checkout"]'));
 const serverOrdering = Boolean(document.querySelector('meta[name="campus-inventory"]'));
 const orderName = document.querySelector("#order-name");
 const orderEmail = document.querySelector("#order-email");
 const orderStatus = document.querySelector("#order-status");
 const save = document.querySelector("#save");
+if (squareCheckout) save.textContent = "Continue to payment";
 let availabilityDate = "";
 let remaining = null;
 let pending = false;
@@ -539,7 +541,7 @@ form.addEventListener("submit", async event => {
       lastRequest = {fingerprint, id: crypto.randomUUID().replaceAll("-", "")};
     }
     pending = true;
-    orderStatus.textContent = "Sending your preorder…";
+    orderStatus.textContent = squareCheckout ? "Opening Square checkout…" : "Sending your preorder…";
     render();
     try {
       const response = await fetch("api/orders", {
@@ -548,8 +550,13 @@ form.addEventListener("submit", async event => {
       });
       const result = await response.json();
       if (!response.ok) {
-        if (response.status === 409) await loadStock();
+        if (response.status === 410) lastRequest = null;
+        if (response.status === 409 || response.status === 410) await loadStock();
         throw Error(result.error);
+      }
+      if (result.checkoutUrl) {
+        window.location.assign(result.checkoutUrl);
+        return;
       }
       quantities.forEach(input => { input.value = "0"; });
       lastRequest = null;
