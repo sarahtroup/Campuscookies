@@ -78,12 +78,21 @@ export default {
     }
     const base = env.SQUARE_ENV === "production" ? "https://connect.squareup.com" : "https://connect.squareupsandbox.com";
     const items = boxes.flatMap(({quantities, gift}, index) => {
-      const prefix = boxes.length > 1 ? `Box ${index + 1}: ` : "";
-      const boxItems = Object.entries(prices).filter(([key]) => quantities[key] > 0).map(([key, label]) => ({
-        name: prefix + label, quantity: String(quantities[key]), base_price_money: {amount: 350, currency: "USD"},
+      const size = Object.values(quantities).reduce((total, qty) => total + qty, 0);
+      const modifiers = Object.entries(prices).filter(([key]) => quantities[key] > 0).map(([key, label]) => ({
+        name: `${quantities[key]} × ${label}`,
+        base_price_money: {amount: 0, currency: "USD"},
       }));
-      if (gift) boxItems.push({name: prefix + "Gift box", quantity: "1", base_price_money: {amount: 500, currency: "USD"}});
-      return boxItems;
+      const boxLabel = boxes.length > 1 ? `Box ${index + 1}` : "Box";
+      const boxItem = {
+        name: `${boxLabel} – ${size} cookies`, quantity: "1", modifiers,
+        base_price_money: {amount: size * 350, currency: "USD"},
+      };
+      if (!gift) return [boxItem];
+      return [boxItem, {
+        name: boxes.length > 1 ? `Gift box (Box ${index + 1})` : "Gift box",
+        quantity: "1", base_price_money: {amount: 500, currency: "USD"},
+      }];
     });
     const note = `Friday ${pickup}, 9:30 a.m.–3 p.m. ET, 1050 N. Davis Street, Jacksonville`;
     try {
