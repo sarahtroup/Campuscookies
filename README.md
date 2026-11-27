@@ -22,3 +22,10 @@ python inventory.py --db /path/to/private/cookies.sqlite cancel ORDER_ID
 
 The database contains customer contact information. Keep the file and backups
 private. Cancelling an order releases its inventory for the pickup date.
+
+## Update the announcement
+
+In GitHub, open `index.html` and select the pencil icon. Search for
+`id="announcement-message"` and replace the text between the opening and
+closing paragraph tags. Commit the change to `main` to publish it. To hide the
+banner, add `hidden` to its opening `<aside>` tag. Remove `hidden` to show it again.

@@ -166,12 +166,32 @@ h2{color:var(--blue);font-size:clamp(1.65rem,4vw,3.55rem);line-height:.98;letter
 .cookie-dialog h2{font-size:clamp(1.7rem,5vw,2.65rem)}
 .cookie-dialog p{line-height:1.55;margin-top:.85rem}
 .cookie-dialog button{border:0;background:#e4f2ff;color:var(--blue);padding:.55rem .95rem;min-height:2.75rem;border-radius:99rem;font:inherit;font-weight:800;cursor:pointer}
+
+.announcement{display:flex;align-items:stretch;background:#0046ae;color:#ffe0a7}
+.announcement[hidden]{display:none}
+.announcement-track{flex:1;min-width:0;overflow:hidden}
+.announcement-message{position:relative;width:fit-content;max-width:100%;margin:0 auto;padding:.55rem .75rem;text-align:center;font-size:.9rem;font-weight:800;line-height:1.35}
+.announcement-toggle{display:none;border:0;border-left:1px solid #ffffff40;background:transparent;color:inherit;padding:.35rem .8rem;font:inherit;font-size:.78rem;font-weight:750;cursor:pointer}
+.announcement-toggle:focus-visible{outline:2px solid #ffe0a7;outline-offset:-4px}
+@media(prefers-reduced-motion:no-preference){
+ .announcement[data-motion] .announcement-toggle{display:block}
+ .announcement[data-motion="on"] .announcement-message{animation:announcement-scroll 26s linear infinite}
+}
+@keyframes announcement-scroll{
+ 0%,18%,100%{left:0;transform:translateX(0)}
+ 58%{left:-100%;transform:translateX(0)}
+ 58.001%{left:100%;transform:translateX(0)}
+}
 </style>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <header><nav class="wrap" aria-label="Main"><a class="home" href="#">Campus Cookies</a><a href="#order">Order</a><a href="#story">Our Story</a></nav></header>
 <main id="main">
+<aside class="announcement" aria-label="Bakery announcement">
+  <div class="announcement-track"><p class="announcement-message" id="announcement-message">Sold out for the holidays. Friday pickups resume January 8, 2027.</p></div>
+  <button class="announcement-toggle" type="button" aria-controls="announcement-message">Pause</button>
+</aside>
 <section class="hero" aria-labelledby="hero-title">
 <div class="wrap"><span class="hero-mark"><img class="hero-logo" src="assets/campus-cookies.png" alt="Campus Cookies" width="500" height="297"></span><h1 id="hero-title"><span>Major flavor.</span> Major impact.</h1><p>Brown butter. Premium chocolate.<br>Baked with purpose.</p><a class="cta" href="#order">Order</a></div>
 <figure class="cluster" id="hero-cookies" aria-label="Five Campus Cookies flavors">
@@ -245,7 +265,7 @@ h2{color:var(--blue);font-size:clamp(1.65rem,4vw,3.55rem);line-height:.98;letter
 <p id="cookie-details-status" hidden>$6 · Sold out</p>
 <p id="cookie-details-description"></p>
 <p><strong>Ingredients</strong><br><span id="cookie-details-ingredients"></span></p>
-<p id="cookie-details-allergens" hidden><strong>Allergens</strong><br>Prepared in a kitchen that processes tree nuts, peanuts, soy, and wheat.</p>
+<p><strong>Allergens</strong><br><span id="cookie-details-allergens"></span> <span id="cookie-details-kitchen" hidden>Prepared in a kitchen that processes tree nuts, peanuts, soy, and wheat.</span></p>
 </dialog>
 <footer class="site-footer">
 <div class="wrap footer-inner">
@@ -261,6 +281,20 @@ h2{color:var(--blue);font-size:clamp(1.65rem,4vw,3.55rem);line-height:.98;letter
 </div>
 </footer>
 <script>
+
+const announcement = document.querySelector(".announcement");
+if (announcement) {
+  const toggle = announcement.querySelector(".announcement-toggle");
+  announcement.dataset.motion = "on";
+  toggle.addEventListener("click", () => {
+    const pause = announcement.dataset.motion === "on";
+    announcement.dataset.motion = pause ? "off" : "on";
+    toggle.textContent = pause ? "Play" : "Pause";
+    toggle.setAttribute("aria-label", pause ? "Play announcement scroll" : "Pause announcement scroll");
+  });
+  toggle.setAttribute("aria-label", "Pause announcement scroll");
+}
+
 const cookieCluster = document.querySelector("#hero-cookies");
 const motionButton = document.querySelector("#cookie-motion");
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -293,30 +327,30 @@ const flavors = [
 const cookieDetails = {
   "valedictorian": [
     "Our signature brown butter chocolate chip cookie. Rich brown butter, premium semi-sweet chocolate chips, and a touch of salt. Classic, refined, and at the top of its class.",
-    "butter, all-purpose flour, organic brown sugar, granulated sugar, baking soda, salt, semi-sweet chocolate chips",
+    "butter, eggs, all-purpose flour, organic brown sugar, granulated sugar, baking soda, salt, semi-sweet chocolate chips",
     true
   ],
   "all-nighter": [
     "Deep, dark chocolate meets espresso with a touch of salt. Dark, decadent, chewy, and definitely worth staying up for.",
-    "butter, all-purpose flour, organic brown sugar, granulated sugar, Dutch-process cocoa powder, espresso powder, baking soda, salt, semi-sweet chocolate chips, dark chocolate chips",
+    "butter, eggs, all-purpose flour, organic brown sugar, granulated sugar, Dutch-process cocoa powder, espresso powder, baking soda, salt, semi-sweet chocolate chips, dark chocolate chips",
     true
   ],
   "nutty-professor": [
     "Chocolate meets peanut butter in one seriously smart combination. Rich, nutty, decadent—and just a little unhinged.",
-    "butter, all-purpose flour, organic brown sugar, granulated sugar, Dutch-process cocoa powder, espresso powder, baking soda, salt, semi-sweet chocolate chips, dark chocolate chips, peanut butter chips"
+    "butter, eggs, all-purpose flour, organic brown sugar, granulated sugar, Dutch-process cocoa powder, espresso powder, baking soda, salt, semi-sweet chocolate chips, dark chocolate chips, peanut butter chips"
   ],
   "overachiever": [
     "Our rich brown butter dough loaded with chocolate, caramel, and sea salt. Decadent, indulgent, and incapable of doing the bare minimum.",
-    "butter, all-purpose flour, organic brown sugar, granulated sugar, baking soda, salt, semi-sweet chocolate chips, caramel sea salt chips"
+    "butter, eggs, all-purpose flour, organic brown sugar, granulated sugar, baking soda, salt, semi-sweet chocolate chips, caramel sea salt chips"
   ],
   "party-animal": [
     "Our signature brown butter cookie dressed up with rainbow sprinkles. Colorful, buttery, and always ready for a good time.",
-    "butter, all-purpose flour, organic brown sugar, granulated sugar, baking soda, salt, rainbow sprinkles",
+    "butter, eggs, all-purpose flour, organic brown sugar, granulated sugar, baking soda, salt, rainbow sprinkles",
     true
   ],
   "roommate": [
     "Two cookies. One tin. Rich brown butter chocolate chip meets decadent dark chocolate in a 3×3\" tin. Different personalities. Shared space. Surprisingly good chemistry.",
-    "butter, all-purpose flour, organic brown sugar, granulated sugar, Dutch-process cocoa powder, espresso powder, baking soda, salt, semi-sweet chocolate chips, dark chocolate chips",
+    "butter, eggs, all-purpose flour, organic brown sugar, granulated sugar, Dutch-process cocoa powder, espresso powder, baking soda, salt, semi-sweet chocolate chips, dark chocolate chips",
     true
   ]
 };
@@ -342,7 +376,7 @@ if (serverOrdering) {
   orderHelp.textContent = "Your request reserves cookies for this Friday. The bakery will follow up by email.";
   orderHelp.hidden = false;
 }
-const pickupStart = "2027-01-01";
+const pickupStart = "2027-01-08";
 const cutoffDays = 4;
 const cutoffHour = 14;
 const easternClock = new Intl.DateTimeFormat("en-US", {
@@ -416,7 +450,8 @@ document.querySelector("#flavors").addEventListener("click", event => {
   detailsDialog.querySelector("#cookie-details-title").textContent = trigger.querySelector(".cookie-name").textContent;
   detailsDialog.querySelector("#cookie-details-description").textContent = description;
   detailsDialog.querySelector("#cookie-details-ingredients").textContent = ingredients;
-  detailsDialog.querySelector("#cookie-details-allergens").hidden = !showAllergens;
+  detailsDialog.querySelector("#cookie-details-allergens").textContent = key === "nutty-professor" ? "Contains eggs and peanuts." : "Contains eggs.";
+  detailsDialog.querySelector("#cookie-details-kitchen").hidden = !showAllergens;
   detailsDialog.querySelector("#cookie-details-status").hidden = key !== "roommate";
   detailsDialog.showModal();
 });

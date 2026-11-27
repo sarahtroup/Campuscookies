@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parent
 FLAVORS = ("valedictorian", "all-nighter", "party-animal", "overachiever", "nutty-professor")
 BOX_SIZES = {6, 12, 24, 36, 48}
 DEFAULT_LIMIT = 100
-FIRST_PICKUP = date(2027, 1, 1)
+FIRST_PICKUP = date(2027, 1, 8)
 EASTERN = ZoneInfo("America/New_York")
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS limits (
@@ -50,7 +50,7 @@ def pickup_day(value):
         raise ValueError("Choose a Friday pickup date.")
     day = date.fromisoformat(value)
     if day < FIRST_PICKUP or day.weekday() != 4:
-        raise ValueError("Choose a Friday pickup date starting in January 2027.")
+        raise ValueError("Choose a Friday pickup date starting January 8, 2027.")
     return day
 
 
