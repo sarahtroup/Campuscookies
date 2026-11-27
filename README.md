@@ -9,8 +9,11 @@ outside the website directory. Set up HTTPS at the hosting layer.
 python inventory.py --db /path/to/private/cookies.sqlite serve
 ```
 
-The service starts each eligible Friday with 100 cookies per flavor and enforces
-the Monday 2 p.m. Eastern cutoff. It stores preorder requests and reserves the
+The service starts each eligible Friday with 125 cookies per flavor and enforces
+the Monday 2 p.m. Eastern cutoff. A separate capacity of 100 Roommate tins is
+configured for each Friday. The Roommate remains sold out on the storefront
+until its checkout is enabled. These capacities are for the Python service.
+GitHub Pages uses email preorders. It stores preorder requests and reserves the
 requested quantities together. It does not send email or collect payments.
 Bakery staff can review requests and follow up using the recorded email address.
 

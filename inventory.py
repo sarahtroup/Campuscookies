@@ -14,7 +14,8 @@ from zoneinfo import ZoneInfo
 ROOT = Path(__file__).resolve().parent
 FLAVORS = ("valedictorian", "all-nighter", "party-animal", "overachiever", "nutty-professor")
 BOX_SIZES = {6, 12, 24, 36, 48}
-DEFAULT_LIMIT = 100
+PICKUP_LIMITS = dict.fromkeys(FLAVORS, 125)
+PICKUP_LIMITS["roommate"] = 100
 FIRST_PICKUP = date(2027, 1, 8)
 EASTERN = ZoneInfo("America/New_York")
 SCHEMA = """
@@ -67,7 +68,10 @@ def availability(db, pickup):
         "SELECT flavor, SUM(quantity) FROM quantities JOIN orders ON orders.id = quantities.order_id "
         "WHERE pickup = ? GROUP BY flavor", (pickup,)
     ))
-    return {flavor: max(0, limits.get(flavor, DEFAULT_LIMIT) - used.get(flavor, 0)) for flavor in FLAVORS}
+    return {
+        item: max(0, limits.get(item, capacity) - used.get(item, 0))
+        for item, capacity in PICKUP_LIMITS.items()
+    }
 
 
 def reserve(db, payload, now=None):
@@ -181,7 +185,7 @@ def main():
     serve.add_argument("--port", type=int, default=9000)
     set_limit = commands.add_parser("set-limit")
     set_limit.add_argument("pickup")
-    set_limit.add_argument("flavor", choices=FLAVORS)
+    set_limit.add_argument("flavor", choices=PICKUP_LIMITS)
     set_limit.add_argument("capacity", type=int)
     orders = commands.add_parser("orders")
     orders.add_argument("pickup")
