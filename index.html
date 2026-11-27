@@ -76,7 +76,7 @@ h2{color:var(--blue);font-size:clamp(1.65rem,4vw,3.55rem);line-height:.98;letter
 .order-sizes input:focus-visible+span{outline:3px solid var(--blue);outline-offset:3px}
 .order-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(.7rem,2vw,1.65rem);list-style:none;padding:0;margin:0}
 .order-cookie{display:flex;flex-direction:column;align-items:center;text-align:center;min-width:0}
-.order-cookie figure{display:grid;place-items:center;width:min(100%,13.5rem);aspect-ratio:1;background:var(--cookie-bg,#e7f4ff);border-radius:50%;margin:0 auto .9rem;overflow:hidden}
+.order-cookie .cookie-photo{display:grid;place-items:center;width:min(100%,13.5rem);aspect-ratio:1;background:var(--cookie-bg,#e7f4ff);border-radius:50%;margin:0 auto .9rem;overflow:hidden}
 .order-cookie:nth-child(2){--cookie-bg:#f5e9fb}.order-cookie:nth-child(3){--cookie-bg:#ffeacf}.order-cookie:nth-child(4){--cookie-bg:#ffedf0}.order-cookie:nth-child(5){--cookie-bg:#e7f3e4}
 .order-cookie img{width:100%;mix-blend-mode:multiply;clip-path:circle(43%)}
 .order-cookie h3{margin:0;font-weight:900;font-size:clamp(1.05rem,1.55vw,1.38rem);line-height:1.05;letter-spacing:-.035em}
@@ -146,6 +146,26 @@ h2{color:var(--blue);font-size:clamp(1.65rem,4vw,3.55rem);line-height:.98;letter
 @media(max-width:42rem){
  .hero .hero-mark{width:clamp(11rem,55vw,14rem)}
 }
+
+.order-grid{grid-template-columns:repeat(6,minmax(0,1fr))}
+@media(max-width:64rem){.order-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:34rem){.order-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.cookie-details-trigger{width:100%;padding:0;border:0;background:none;color:inherit;font:inherit;cursor:pointer}
+.cookie-details-trigger:hover .cookie-name{text-decoration:underline;text-underline-offset:.16em}
+.cookie-name,.cookie-details-label{display:block}
+.cookie-details-label{color:var(--blue);font-size:.79rem;font-weight:750;margin-top:.34rem}
+.order-cookie .roommate-photo{position:relative;background:#fff1d4}
+.roommate-tin{width:64%;aspect-ratio:1;display:grid;grid-template-columns:1fr 1fr;align-items:center;border:3px solid #8b9bb2;border-radius:17%;background:#e3e9f0;box-shadow:inset 0 0 0 3px white;transform:rotate(-8deg)}
+.roommate-tin img{transform:scale(1.25)}
+.roommate-tin img:first-child{translate:15% 13%}
+.roommate-tin img:last-child{translate:-12% -13%}
+.roommate-status{margin:auto 0 0;color:var(--blue);font-weight:850}
+.cookie-dialog{width:min(calc(100% - 2rem),34rem);max-height:calc(100% - 2rem);border:0;border-top:.5rem solid var(--blue);border-radius:1.15rem;padding:clamp(1rem,5vw,2rem);background:#fffaf1;color:var(--ink);box-shadow:0 16px 70px #102d6544}
+.cookie-dialog::backdrop{background:#102343a6}
+.cookie-dialog form{display:flex;justify-content:flex-end;margin-bottom:.55rem}
+.cookie-dialog h2{font-size:clamp(1.7rem,5vw,2.65rem)}
+.cookie-dialog p{line-height:1.55;margin-top:.85rem}
+.cookie-dialog button{border:0;background:#e4f2ff;color:var(--blue);padding:.55rem .95rem;min-height:2.75rem;border-radius:99rem;font:inherit;font-weight:800;cursor:pointer}
 </style>
 </head>
 <body>
@@ -219,6 +239,14 @@ h2{color:var(--blue);font-size:clamp(1.65rem,4vw,3.55rem);line-height:.98;letter
 </div>
 </section>
 </main>
+<dialog class="cookie-dialog" id="cookie-details" aria-labelledby="cookie-details-title">
+<form method="dialog"><button autofocus>Close</button></form>
+<h2 id="cookie-details-title"></h2>
+<p id="cookie-details-status" hidden>$6 · Sold out</p>
+<p id="cookie-details-description"></p>
+<p><strong>Ingredients</strong><br><span id="cookie-details-ingredients"></span></p>
+<p id="cookie-details-allergens" hidden><strong>Allergens</strong><br>Prepared in a kitchen that processes tree nuts, peanuts, soy, and wheat.</p>
+</dialog>
 <footer class="site-footer">
 <div class="wrap footer-inner">
 <a class="footer-arc" href="https://arcjacksonville.org/"><img src="assets/the-arc-jacksonville.png" alt="The Arc Jacksonville" width="372" height="252" loading="lazy"></a>
@@ -262,6 +290,36 @@ const flavors = [
   ["Overachiever", "Rich brown butter with chocolate and caramel sea salt chips.", "overachiever"],
   ["Nutty Professor", "Chocolate meets peanut butter in one seriously smart combination.", "nutty-professor"]
 ];
+const cookieDetails = {
+  "valedictorian": [
+    "Our signature brown butter chocolate chip cookie. Rich brown butter, premium semi-sweet chocolate chips, decadent dark chocolate chunks, and a touch of salt. Classic, refined, and at the top of its class.",
+    "butter, all-purpose flour, organic brown sugar, granulated sugar, baking soda, salt, semi-sweet chocolate chips.",
+    true
+  ],
+  "all-nighter": [
+    "Deep, dark chocolate meets espresso with a touch of salt. Dark, decadent, chewy, and definitely worth staying up for.",
+    "butter, all-purpose flour, organic brown sugar, granulated sugar, Dutch-process cocoa powder, espresso powder, baking soda, salt, semi-sweet chocolate chips, dark chocolate chips.",
+    true
+  ],
+  "nutty-professor": [
+    "Chocolate meets peanut butter in one seriously smart combination. Rich, nutty, decadent—and just a little unhinged.",
+    "butter, all-purpose flour, organic brown sugar, granulated sugar, Dutch-process cocoa powder, espresso powder, baking soda, salt, semi-sweet chocolate chips, dark chocolate chips, peanut butter chips."
+  ],
+  "overachiever": [
+    "Our rich brown butter dough loaded with chocolate, caramel, and sea salt. Decadent, indulgent, and incapable of doing the bare minimum.",
+    "butter, all-purpose flour, organic brown sugar, granulated sugar, baking soda, salt, semi-sweet chocolate chips, caramel sea salt chips."
+  ],
+  "party-animal": [
+    "Our signature brown butter cookie dressed up with rainbow sprinkles. Colorful, buttery, and always ready for a good time.",
+    "butter, all-purpose flour, organic brown sugar, granulated sugar, baking soda, salt, rainbow sprinkles.",
+    true
+  ],
+  "roommate": [
+    "Two cookies. One tin. Rich brown butter chocolate chip meets decadent dark chocolate in a 3×3\" tin. Different personalities. Shared space. Surprisingly good chemistry.",
+    "butter, all-purpose flour, organic brown sugar, granulated sugar, Dutch-process cocoa powder, espresso powder, baking soda, salt, semi-sweet chocolate chips, dark chocolate chips.",
+    true
+  ]
+};
 const money = cents => new Intl.NumberFormat("en-US", {style:"currency", currency:"USD"}).format(cents / 100);
 const form = document.querySelector("#box");
 const gift = document.querySelector("#gift");
@@ -326,15 +384,43 @@ document.querySelector("#sizes").innerHTML = sizes.map(size =>
 ).join("");
 document.querySelector("#flavors").innerHTML = flavors.map(([name, description, photo], index) =>
   `<article class="order-cookie">
-    <figure><img src="assets/${photo}.webp" width="660" height="660" alt="" loading="lazy"></figure>
-    <h3>${name}</h3><p>${description}</p><small class="flavor-stock" hidden></small>
+    <h3><button type="button" class="cookie-details-trigger" data-cookie-details="${photo}" aria-haspopup="dialog">
+      <span class="cookie-photo"><img src="assets/${photo}.webp" width="660" height="660" alt="" loading="lazy"></span>
+      <span class="cookie-name">The ${name}</span><span class="cookie-details-label">View details</span>
+    </button></h3>
+    <p>${description}</p><small class="flavor-stock" hidden></small>
     <div class="stepper">
       <button type="button" data-change="-1" aria-label="Remove one ${name}" disabled>−</button>
       <input class="quantity" name="flavor-${index}" type="number" min="0" max="48" step="1" value="0" inputmode="numeric" aria-label="${name} quantity">
       <button type="button" data-change="1" aria-label="Add one ${name}">+</button>
     </div>
   </article>`
-).join("");
+).join("") + `
+  <article class="order-cookie">
+    <h3><button type="button" class="cookie-details-trigger" data-cookie-details="roommate" aria-haspopup="dialog">
+      <span class="cookie-photo roommate-photo" aria-hidden="true"><span class="roommate-tin">
+        <img src="assets/valedictorian.webp" width="660" height="660" alt="" loading="lazy">
+        <img src="assets/all-nighter.webp" width="660" height="660" alt="" loading="lazy">
+      </span></span>
+      <span class="cookie-name">The Roommate</span><span class="cookie-details-label">View details</span>
+    </button></h3>
+    <p>Valedictorian and All-Nighter in one 3×3″ tin.</p>
+    <small class="roommate-status">$6 · Sold out</small>
+  </article>
+`;
+const detailsDialog = document.querySelector("#cookie-details");
+document.querySelector("#flavors").addEventListener("click", event => {
+  const trigger = event.target.closest("[data-cookie-details]");
+  if (!trigger) return;
+  const key = trigger.dataset.cookieDetails;
+  const [description, ingredients, showAllergens] = cookieDetails[key];
+  detailsDialog.querySelector("#cookie-details-title").textContent = trigger.querySelector(".cookie-name").textContent;
+  detailsDialog.querySelector("#cookie-details-description").textContent = description;
+  detailsDialog.querySelector("#cookie-details-ingredients").textContent = ingredients;
+  detailsDialog.querySelector("#cookie-details-allergens").hidden = !showAllergens;
+  detailsDialog.querySelector("#cookie-details-status").hidden = key !== "roommate";
+  detailsDialog.showModal();
+});
 const quantities = [...form.querySelectorAll(".quantity")];
 const stockLabels = [...form.querySelectorAll(".flavor-stock")];
 const steppers = [...form.querySelectorAll(".stepper")];
