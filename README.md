@@ -26,6 +26,28 @@ python inventory.py --db /path/to/private/cookies.sqlite cancel ORDER_ID
 The database contains customer contact information. Keep the file and backups
 private. Cancelling an order releases its inventory for the pickup date.
 
+## Square checkout on GitHub Pages
+
+Deploy `square-checkout.mjs` as a Cloudflare Worker module. Add the Square access
+token as a Worker secret named `SQUARE_ACCESS_TOKEN` and configure
+`SQUARE_LOCATION_ID` for the Campus Cookies pickup location. Sandbox is the
+default. Use a separate Worker and its own secrets for production and set
+`SQUARE_ENV=production` on that Worker.
+
+In the storefront document head, point to the Worker’s checkout endpoint.
+
+```html
+<meta name="campus-square-checkout" content="https://YOUR-WORKER.workers.dev/checkout">
+```
+
+The Worker accepts calls from the existing GitHub Pages origin, prices the box
+server-side, and checks the 9:30 a.m. Eastern cutoff the Friday before pickup
+before creating a single-use Square payment link. The cutoff applies to link
+creation. A previously issued link can still be opened after the cutoff. This
+checkout path has no cookie inventory quotas and requires no database. Confirm
+the Square location, the total, pickup details in Square Orders, and sales tax
+treatment before switching to production.
+
 ## Update the announcement
 
 In GitHub, open `index.html` and select the pencil icon. Search for

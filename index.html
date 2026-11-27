@@ -225,6 +225,8 @@ h2{color:var(--blue);font-size:clamp(1.65rem,4vw,3.55rem);line-height:.98;letter
 <div class="order-summary">
 <p id="counts" role="status"></p>
 <label class="gift-option"><span class="gift-preview" aria-hidden="true"><img src="assets/gift-box.webp" alt="" width="488" height="650" loading="lazy"></span><span><input type="checkbox" id="gift"> Add a gift box (+$5)</span></label>
+<button type="button" class="motion-toggle" id="add-box" hidden>Add another box</button>
+<ul id="saved-boxes" aria-label="Boxes in your order" hidden></ul>
 <p><strong id="total"></strong> total</p>
 <button class="cta" id="save" type="submit" disabled>Order</button>
 </div>
@@ -253,7 +255,7 @@ h2{color:var(--blue);font-size:clamp(1.65rem,4vw,3.55rem);line-height:.98;letter
 <p><a href="https://www.google.com/maps/search/?api=1&amp;query=1050+N.+Davis+Street,+Jacksonville,+FL+32209">Get directions</a></p>
 </div>
 <div>
-<p>Preorder by Monday at 2 p.m. and pick up on your selected Friday from 9:30 a.m. to 3 p.m. Eastern.</p>
+<p id="pickup-deadline">Preorder by Monday at 2 p.m. and pick up on your selected Friday from 9:30 a.m. to 3 p.m. Eastern.</p>
 <p>Planning a larger order? <a href="mailto:campuscookiesjax@arcjacksonville.org?subject=Campus%20Cookies%20catering%20inquiry">Ask about catering and corporate gifts.</a></p>
 </div>
 </div>
@@ -358,11 +360,24 @@ const money = cents => new Intl.NumberFormat("en-US", {style:"currency", currenc
 const form = document.querySelector("#box");
 const gift = document.querySelector("#gift");
 const pickupDate = document.querySelector("#pickup-date");
-const serverOrdering = Boolean(document.querySelector('meta[name="campus-inventory"]'));
+const checkoutEndpoint = document.querySelector('meta[name="campus-square-checkout"]')?.content;
+const squareCheckout = Boolean(checkoutEndpoint);
+const serverOrdering = squareCheckout || Boolean(document.querySelector('meta[name="campus-inventory"]'));
 const orderName = document.querySelector("#order-name");
 const orderEmail = document.querySelector("#order-email");
 const orderStatus = document.querySelector("#order-status");
 const save = document.querySelector("#save");
+if (squareCheckout) {
+  save.textContent = "Continue to payment";
+  document.querySelector("#pickup-deadline").textContent =
+    "Order by 9:30 a.m. Eastern the Friday before pickup. Pick up on your selected Friday from 9:30 a.m. to 3 p.m. Eastern.";
+}
+const trackStock = serverOrdering && !squareCheckout;
+const addBox = document.querySelector("#add-box");
+const savedBoxList = document.querySelector("#saved-boxes");
+const savedBoxes = [];
+const maxBoxes = 10;
+addBox.hidden = trackStock;
 let availabilityDate = "";
 let remaining = null;
 let pending = false;
@@ -373,15 +388,17 @@ if (serverOrdering) {
   orderName.disabled = orderEmail.disabled = false;
   orderName.required = orderEmail.required = true;
   const orderHelp = document.querySelector("#order-help");
-  orderHelp.textContent = "Your request reserves cookies for this Friday. The bakery will follow up by email.";
+  orderHelp.textContent = squareCheckout
+    ? "Choose your pickup date and continue to Square to pay."
+    : "Your request reserves cookies for this Friday. The bakery will follow up by email.";
   orderHelp.hidden = false;
 }
 const pickupStart = "2027-01-08";
-const cutoffDays = 4;
-const cutoffHour = 14;
+const cutoffDays = squareCheckout ? 7 : 4;
+const cutoffMinutes = squareCheckout ? 9 * 60 + 30 : 14 * 60;
 const easternClock = new Intl.DateTimeFormat("en-US", {
   timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit",
-  hour: "2-digit", hourCycle: "h23"
+  hour: "2-digit", minute: "2-digit", hourCycle: "h23"
 });
 const pickupLabel = new Intl.DateTimeFormat("en-US", {
   timeZone: "UTC", weekday: "long", month: "long", day: "numeric", year: "numeric"
@@ -396,7 +413,7 @@ function availableFridays(now = new Date()) {
     const deadline = new Date(day);
     deadline.setUTCDate(deadline.getUTCDate() - cutoffDays);
     const cutoff = deadline.toISOString().slice(0, 10);
-    if (today < cutoff || (today === cutoff && Number(parts.hour) < cutoffHour)) {
+    if (today < cutoff || (today === cutoff && Number(parts.hour) * 60 + Number(parts.minute) < cutoffMinutes)) {
       dates.push({value: day.toISOString().slice(0, 10), label: pickupLabel.format(day)});
     }
     day.setUTCDate(day.getUTCDate() + 7);
@@ -488,8 +505,40 @@ function boxState() {
   const selected = quantities.map(field => Number(field.value));
   const count = selected.reduce((sum, quantity) => sum + quantity, 0);
   const total = size * pricePerCookie + (gift.checked ? giftPrice : 0);
-  return {size, selected, count, total};
+  return {size, selected, count, total, gift: gift.checked};
 }
+function renderSavedBoxes() {
+  savedBoxList.hidden = savedBoxes.length === 0;
+  savedBoxList.replaceChildren(...savedBoxes.map((box, index) => {
+    const item = document.createElement("li");
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "motion-toggle";
+    remove.textContent = "Remove";
+    remove.setAttribute("aria-label", `Remove box ${index + 1}`);
+    const flavorsInBox = flavors.flatMap(([name], flavorIndex) =>
+      box.selected[flavorIndex] ? [`${box.selected[flavorIndex]} × ${name}`] : []
+    ).join(", ");
+    item.append(`Box ${index + 1}: ${flavorsInBox}${box.gift ? " + gift box" : ""} · ${money(box.total)} `, remove);
+    remove.addEventListener("click", () => {
+      savedBoxes.splice(index, 1);
+      renderSavedBoxes();
+      render();
+      addBox.disabled ? pickupDate.focus() : addBox.focus();
+    });
+    return item;
+  }));
+}
+addBox.addEventListener("click", () => {
+  const box = boxState();
+  if (addBox.disabled) return;
+  savedBoxes.push(box);
+  quantities.forEach(input => { input.value = "0"; });
+  gift.checked = false;
+  renderSavedBoxes();
+  render();
+  form.querySelector('input[name="size"]:checked').focus();
+});
 function render() {
   refreshPickupDates();
   const {size, selected, count, total} = boxState();
@@ -497,7 +546,10 @@ function render() {
   document.querySelector("#counts").textContent = extra > 0
     ? `Remove ${extra} to fit this box.`
     : count === size ? "Your box is full!" : `${size - count} more to fill your box.`;
-  document.querySelector("#total").textContent = money(total);
+  const savedTotal = savedBoxes.reduce((sum, box) => sum + box.total, 0);
+  document.querySelector("#total").textContent = money(savedTotal + (savedBoxes.length && count === 0 ? 0 : total));
+  const validBox = count === size && quantities.every(input => input.validity.valid);
+  addBox.disabled = pending || !validBox || savedBoxes.length >= maxBoxes - 1;
   const stockReady = availabilityDate === pickupDate.value && remaining !== null;
   const exceedsStock = stockReady && flavors.some(([, , key], index) => selected[index] > remaining[key]);
   stockLabels.forEach((label, index) => {
@@ -512,48 +564,57 @@ function render() {
     stepper.querySelector('[data-change="1"]').disabled = !Number.isInteger(selected[index]) || count >= size || selected[index] >= size
       || (stockReady && selected[index] >= remaining[flavors[index][2]]);
   });
-  save.disabled = pending || count !== size || !form.checkValidity()
-    || (serverOrdering && (!stockReady || exceedsStock));
+  save.disabled = pending || !(validBox || (savedBoxes.length && count === 0 && !gift.checked)) || !form.checkValidity()
+    || (trackStock && (!stockReady || exceedsStock));
 }
 form.addEventListener("input", render);
 window.addEventListener("focus", render);
 setInterval(render, 30_000);
-if (serverOrdering) pickupDate.addEventListener("change", loadStock);
+if (trackStock) pickupDate.addEventListener("change", loadStock);
 form.addEventListener("submit", async event => {
   event.preventDefault();
   refreshPickupDates();
-  const {size, selected, count, total} = boxState();
-  if (!pickupDate.value || count !== size || !form.checkValidity()) {
+  const current = boxState();
+  const boxes = [...savedBoxes, ...(current.count === 0 ? [] : [current])];
+  if (!pickupDate.value || save.disabled || !form.checkValidity()) {
     render();
     form.reportValidity();
     return;
   }
   if (serverOrdering) {
     if (pending || save.disabled) return;
+    const boxPayload = box => ({
+      gift: box.gift, quantities: Object.fromEntries(flavors.map(([, , key], index) => [key, box.selected[index]]))
+    });
     const payload = {
       pickup: pickupDate.value, name: orderName.value.trim(), email: orderEmail.value.trim(),
-      gift: gift.checked, quantities: Object.fromEntries(flavors.map(([, , key], index) => [key, selected[index]]))
+      ...(squareCheckout ? {boxes: boxes.map(boxPayload)} : boxPayload(current))
     };
     const fingerprint = JSON.stringify(payload);
     if (lastRequest?.fingerprint !== fingerprint) {
       lastRequest = {fingerprint, id: crypto.randomUUID().replaceAll("-", "")};
     }
     pending = true;
-    orderStatus.textContent = "Sending your preorder…";
+    orderStatus.textContent = squareCheckout ? "Opening Square checkout…" : "Sending your preorder…";
     render();
     try {
-      const response = await fetch("api/orders", {
+      const response = await fetch(checkoutEndpoint || "api/orders", {
         method: "POST", headers: {"Content-Type": "application/json"},
         body: JSON.stringify({...payload, id: lastRequest.id})
       });
       const result = await response.json();
       if (!response.ok) {
-        if (response.status === 409) await loadStock();
+        if (response.status === 410) lastRequest = null;
+        if (trackStock && response.status === 409) await loadStock();
         throw Error(result.error);
+      }
+      if (result.checkoutUrl) {
+        window.location.assign(result.checkoutUrl);
+        return;
       }
       quantities.forEach(input => { input.value = "0"; });
       lastRequest = null;
-      await loadStock();
+      if (trackStock) await loadStock();
       orderStatus.textContent = `Preorder received. Reference: ${result.id}. Total: ${money(result.totalCents)}.`;
     } catch (error) {
       orderStatus.textContent = error.message || "Could not submit your preorder. Please try again.";
@@ -566,10 +627,12 @@ form.addEventListener("submit", async event => {
   const lines = [
     "Hello Campus Cookies, I’d like to request a preorder.",
     "",
-    `Box of ${size} individually wrapped cookies`,
-    ...flavors.flatMap(([name], index) => selected[index] ? [`${selected[index]} × ${name}`] : []),
-    `Gift box: ${gift.checked ? money(giftPrice) : "No"}`,
-    `Box total: ${money(total)}`,
+    ...boxes.flatMap(({size, selected, gift}, boxIndex) => [
+      `Box ${boxIndex + 1}: ${size} individually wrapped cookies`,
+      ...flavors.flatMap(([name], index) => selected[index] ? [`${selected[index]} × ${name}`] : []),
+      `Gift box: ${gift ? money(giftPrice) : "No"}`, ""
+    ]),
+    `Order total: ${money(boxes.reduce((sum, box) => sum + box.total, 0))}`,
     "",
     "Name:",
     "Phone:",
