@@ -59,14 +59,17 @@ export default {
     }
 
     const {id, pickup, quantities, gift, name, email} = order ?? {};
+    const boxes = order?.boxes ?? [{quantities, gift}];
     const pickupAt = pickupTime(pickup);
     if (!pickupAt) return respond(400, {error: "Choose an available Friday. Orders close at 9:30 a.m. Eastern the Friday before pickup."});
     if (typeof id !== "string" || !/^[a-f0-9]{32}$/.test(id) ||
         typeof name !== "string" || !name.trim() || name.length > 100 ||
         typeof email !== "string" || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
-        typeof gift !== "boolean" || !quantities || Object.keys(quantities).length !== 5 ||
-        !Object.keys(prices).every(key => Number.isInteger(quantities[key]) && quantities[key] >= 0 && quantities[key] <= 48) ||
-        ![6, 12, 24, 36, 48].includes(Object.values(quantities).reduce((total, qty) => total + qty, 0))) {
+        !Array.isArray(boxes) || boxes.length < 1 || boxes.length > 10 ||
+        !boxes.every(box => box && typeof box.gift === "boolean" && box.quantities &&
+          Object.keys(box.quantities).length === 5 &&
+          Object.keys(prices).every(key => Number.isInteger(box.quantities[key]) && box.quantities[key] >= 0 && box.quantities[key] <= 48) &&
+          [6, 12, 24, 36, 48].includes(Object.values(box.quantities).reduce((total, qty) => total + qty, 0)))) {
       return respond(400, {error: "Review your contact information and fill the selected box size."});
     }
 
@@ -74,10 +77,14 @@ export default {
       return respond(503, {error: "Online payment is temporarily unavailable."});
     }
     const base = env.SQUARE_ENV === "production" ? "https://connect.squareup.com" : "https://connect.squareupsandbox.com";
-    const items = Object.entries(prices).filter(([key]) => quantities[key] > 0).map(([key, label]) => ({
-      name: label, quantity: String(quantities[key]), base_price_money: {amount: 350, currency: "USD"},
-    }));
-    if (gift) items.push({name: "Gift box", quantity: "1", base_price_money: {amount: 500, currency: "USD"}});
+    const items = boxes.flatMap(({quantities, gift}, index) => {
+      const prefix = boxes.length > 1 ? `Box ${index + 1}: ` : "";
+      const boxItems = Object.entries(prices).filter(([key]) => quantities[key] > 0).map(([key, label]) => ({
+        name: prefix + label, quantity: String(quantities[key]), base_price_money: {amount: 350, currency: "USD"},
+      }));
+      if (gift) boxItems.push({name: prefix + "Gift box", quantity: "1", base_price_money: {amount: 500, currency: "USD"}});
+      return boxItems;
+    });
     const note = `Friday ${pickup}, 9:30 a.m.–3 p.m. ET, 1050 N. Davis Street, Jacksonville`;
     try {
       const response = await fetch(base + "/v2/online-checkout/payment-links", {
