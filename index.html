@@ -173,16 +173,18 @@ h2{color:var(--blue);font-size:clamp(1.65rem,4vw,3.55rem);line-height:.98;letter
 .announcement[hidden]{display:none}
 .announcement-track{flex:1;min-width:0;overflow:hidden}
 .announcement-message{position:relative;width:fit-content;max-width:100%;margin:0 auto;padding:.55rem .75rem;text-align:center;font-size:clamp(1.125rem,2.2vw,1.35rem);font-weight:800;line-height:1.35}
+.announcement-repeat{display:none}
 .announcement-toggle{display:none;border:0;border-left:1px solid #ffffff40;background:transparent;color:inherit;padding:.35rem .8rem;font:inherit;font-size:.78rem;font-weight:750;cursor:pointer}
 .announcement-toggle:focus-visible{outline:2px solid #ffe0a7;outline-offset:-4px}
 @media(prefers-reduced-motion:no-preference){
  .announcement[data-motion] .announcement-toggle{display:block}
- .announcement[data-motion="on"] .announcement-message{width:max-content;max-width:none;white-space:nowrap;animation:announcement-scroll 20s linear infinite}
+ .announcement[data-motion="on"] .announcement-loop{display:flex;width:max-content}
+ .announcement[data-motion="on"] .announcement-message{flex:none;width:max-content;max-width:none;margin:0;padding-inline:1.5rem;white-space:nowrap}
+ .announcement[data-motion="on"] .announcement-repeat{display:block}
+ .announcement[data-motion="on"] .announcement-loop[data-ready]{animation:announcement-scroll var(--announcement-duration) linear infinite}
 }
 @keyframes announcement-scroll{
- 0%,18%,100%{left:0;transform:translateX(0)}
- 58%{left:-100%;transform:translateX(0)}
- 58.001%{left:100%;transform:translateX(0)}
+ to{transform:translateX(var(--announcement-offset))}
 }
 </style>
 </head>
@@ -191,7 +193,7 @@ h2{color:var(--blue);font-size:clamp(1.65rem,4vw,3.55rem);line-height:.98;letter
 <header><nav class="wrap" aria-label="Main"><a class="home" href="#">Campus Cookies</a><a href="#order">Order</a><a href="#story">Our Story</a></nav></header>
 <main id="main">
 <aside class="announcement" aria-label="Bakery announcement">
-  <div class="announcement-track"><p class="announcement-message" id="announcement-message">Sold out for the holidays. Pick-ups resume January 8.</p></div>
+  <div class="announcement-track"><div class="announcement-loop"><p class="announcement-message" id="announcement-message">Sold out for the holidays. Pick-ups resume January 8.</p></div></div>
   <button class="announcement-toggle" type="button" aria-controls="announcement-message">Pause</button>
 </aside>
 <section class="hero" aria-labelledby="hero-title">
@@ -298,10 +300,39 @@ h2{color:var(--blue);font-size:clamp(1.65rem,4vw,3.55rem);line-height:.98;letter
 const announcement = document.querySelector(".announcement");
 if (announcement) {
   const toggle = announcement.querySelector(".announcement-toggle");
+  const track = announcement.querySelector(".announcement-track");
+  const loop = announcement.querySelector(".announcement-loop");
+  const message = announcement.querySelector("#announcement-message");
+  const motionPreference = window.matchMedia("(prefers-reduced-motion: no-preference)");
+  function syncAnnouncementLoop() {
+    if (!motionPreference.matches || announcement.dataset.motion !== "on") return;
+    const width = message.getBoundingClientRect().width;
+    if (!width || !track.clientWidth) return;
+    const repeats = Math.ceil(track.clientWidth / width);
+    if (loop.children.length !== repeats + 1) {
+      loop.querySelectorAll(".announcement-repeat").forEach(copy => copy.remove());
+      for (let index = 0; index < repeats; index++) {
+        const copy = document.createElement("p");
+        copy.className = "announcement-message announcement-repeat";
+        copy.setAttribute("aria-hidden", "true");
+        copy.textContent = message.textContent;
+        loop.append(copy);
+      }
+    }
+    loop.style.setProperty("--announcement-offset", `${-width}px`);
+    loop.style.setProperty("--announcement-duration", `${width / 60}s`);
+    loop.dataset.ready = "";
+  }
   announcement.dataset.motion = "on";
+  const announcementObserver = new ResizeObserver(syncAnnouncementLoop);
+  announcementObserver.observe(track);
+  announcementObserver.observe(message);
+  motionPreference.addEventListener("change", syncAnnouncementLoop);
+  syncAnnouncementLoop();
   toggle.addEventListener("click", () => {
     const pause = announcement.dataset.motion === "on";
     announcement.dataset.motion = pause ? "off" : "on";
+    syncAnnouncementLoop();
     toggle.textContent = pause ? "Play" : "Pause";
     toggle.setAttribute("aria-label", pause ? "Play announcement scroll" : "Pause announcement scroll");
   });
