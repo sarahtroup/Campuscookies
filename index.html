@@ -116,7 +116,8 @@ h2{color:var(--blue);font-size:clamp(1.65rem,4vw,3.55rem);line-height:.98;letter
 .pickup p{margin-top:.5rem;overflow-wrap:anywhere}
 .pickup a{text-underline-offset:.2em}
 @media(max-width:42rem){.pickup-inner{grid-template-columns:1fr}}
-#contact{padding:1rem 0}
+.order-pickup{flex-basis:100%;margin:0}
+#contact{flex-basis:100%;padding:0}
 #contact label{font-weight:800}
 #contact input{display:block;padding:.6rem;border:1px solid #9ab0cc;border-radius:.65rem;margin:.3rem 0 .75rem;color:inherit;font:inherit;width:min(100%,22rem)}
 .mission{background:#eff8ff;color:#15315c}
@@ -211,23 +212,23 @@ h2{color:var(--blue);font-size:clamp(1.65rem,4vw,3.55rem);line-height:.98;letter
 <p class="drop-intro">Mix your favorites at $3.50 each. Every cookie is individually wrapped.</p>
 <form id="box">
 <div class="order-prefs">
-<div><label for="pickup-date">Pickup Friday</label>
-<select id="pickup-date" name="pickupDate" required aria-describedby="pickup-note"><option value="">Choose a date</option></select>
-<small id="pickup-note">Friday pickup, 9:30 a.m. to 3 p.m. Eastern.</small></div>
 <fieldset><legend>Cookies per box</legend><div class="order-sizes" id="sizes"></div></fieldset>
 </div>
 <fieldset class="cookie-choices" id="lineup"><legend>Pick your flavors</legend><div class="order-grid" id="flavors"></div></fieldset>
+<div class="order-summary">
+<p id="counts" role="status"></p>
+<label class="gift-option"><span class="gift-preview" aria-hidden="true"><img src="assets/gift-box.webp" alt="" width="488" height="650" loading="lazy"></span><span><input type="checkbox" id="gift"> Add a gift box (+$5)</span></label>
+<button type="button" class="motion-toggle" id="add-box" hidden>Add another box</button>
+<ul id="saved-boxes" aria-label="Boxes in your order" hidden></ul>
+<div class="order-prefs order-pickup"><div><label for="pickup-date">Pickup Friday</label>
+<select id="pickup-date" name="pickupDate" required aria-describedby="pickup-note"><option value="">Choose a date</option></select>
+<small id="pickup-note">Friday pickup, 9:30 a.m. to 3 p.m. Eastern.</small></div></div>
 <div id="contact" hidden>
 <label for="order-name">Pickup name</label>
 <input id="order-name" autocomplete="name" maxlength="100" disabled>
 <label for="order-email">Email</label>
 <input id="order-email" type="email" autocomplete="email" maxlength="254" disabled>
 </div>
-<div class="order-summary">
-<p id="counts" role="status"></p>
-<label class="gift-option"><span class="gift-preview" aria-hidden="true"><img src="assets/gift-box.webp" alt="" width="488" height="650" loading="lazy"></span><span><input type="checkbox" id="gift"> Add a gift box (+$5)</span></label>
-<button type="button" class="motion-toggle" id="add-box" hidden>Add another box</button>
-<ul id="saved-boxes" aria-label="Boxes in your order" hidden></ul>
 <p><strong id="total"></strong> total</p>
 <button class="cta" id="save" type="submit" disabled>Review email preorder</button>
 </div>
