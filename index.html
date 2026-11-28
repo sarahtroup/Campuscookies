@@ -228,8 +228,17 @@ h2{color:var(--blue);font-size:clamp(1.65rem,4vw,3.55rem);line-height:.98;letter
 <button type="button" class="motion-toggle" id="add-box" hidden>Add another box</button>
 <ul id="saved-boxes" aria-label="Boxes in your order" hidden></ul>
 <p><strong id="total"></strong> total</p>
-<button class="cta" id="save" type="submit" disabled>Order</button>
+<button class="cta" id="save" type="submit" disabled>Review email preorder</button>
 </div>
+<section id="email-preorder" aria-labelledby="email-preorder-title" hidden>
+<h3 id="email-preorder-title" tabindex="-1">Your preorder email</h3>
+<p>Open the draft or copy it into your email app. Add your name and phone number and send it to <strong>campuscookiesjax@arcjacksonville.org</strong>.</p>
+<label for="email-preorder-message">Order details</label>
+<textarea id="email-preorder-message" rows="10" readonly style="display:block;width:100%;font:inherit;margin:.5rem 0"></textarea>
+<a class="cta" id="email-preorder-link">Open email draft</a>
+<button class="motion-toggle" id="email-preorder-copy" type="button">Copy order details</button>
+<p id="email-preorder-feedback" role="status"></p>
+</section>
 <p id="order-status" class="order-help" role="status" hidden></p>
 <p class="order-help" id="order-help" hidden></p>
 </form>
@@ -367,6 +376,21 @@ const orderName = document.querySelector("#order-name");
 const orderEmail = document.querySelector("#order-email");
 const orderStatus = document.querySelector("#order-status");
 const save = document.querySelector("#save");
+const emailPreorder = document.querySelector("#email-preorder");
+const emailMessage = document.querySelector("#email-preorder-message");
+const emailFeedback = document.querySelector("#email-preorder-feedback");
+const emailLink = document.querySelector("#email-preorder-link");
+document.querySelector("#email-preorder-copy").addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(emailMessage.value);
+    emailFeedback.textContent = "Order details copied.";
+  } catch {
+    emailMessage.focus();
+    emailMessage.select();
+    emailFeedback.textContent = "Order details selected. Use your device’s copy command.";
+  }
+});
+form.addEventListener("input", () => { emailPreorder.hidden = true; });
 if (squareCheckout) {
   save.textContent = "Continue to payment";
   document.querySelector("#pickup-deadline").textContent =
@@ -383,6 +407,7 @@ let remaining = null;
 let pending = false;
 let lastRequest = null;
 if (serverOrdering) {
+  if (!squareCheckout) save.textContent = "Order";
   document.querySelector("#contact").hidden = false;
   orderStatus.hidden = false;
   orderName.disabled = orderEmail.disabled = false;
@@ -480,6 +505,7 @@ steppers.forEach((stepper,index) => {
     const button = event.target.closest("button[data-change]");
     if (!button || button.disabled) return;
     const quantity = quantities[index];
+    emailPreorder.hidden = true;
     quantity.value = String(Number(quantity.value) + Number(button.dataset.change));
     render();
   });
@@ -508,6 +534,7 @@ function boxState() {
   return {size, selected, count, total, gift: gift.checked};
 }
 function renderSavedBoxes() {
+  emailPreorder.hidden = true;
   savedBoxList.hidden = savedBoxes.length === 0;
   savedBoxList.replaceChildren(...savedBoxes.map((box, index) => {
     const item = document.createElement("li");
@@ -640,8 +667,11 @@ form.addEventListener("submit", async event => {
     "Pickup at The Arc Jacksonville, 1050 N. Davis Street, Jacksonville, FL 32209."
   ];
   const subject = encodeURIComponent("Campus Cookies preorder");
-  const body = encodeURIComponent(lines.join("\n"));
-  window.location.href = `mailto:campuscookiesjax@arcjacksonville.org?subject=${subject}&body=${body}`;
+  emailMessage.value = lines.join("\n");
+  emailLink.href = `mailto:campuscookiesjax@arcjacksonville.org?subject=${subject}&body=${encodeURIComponent(emailMessage.value)}`;
+  emailFeedback.textContent = "";
+  emailPreorder.hidden = false;
+  document.querySelector("#email-preorder-title").focus();
 });
 render();
 </script>
